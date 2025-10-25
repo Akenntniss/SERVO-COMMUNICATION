@@ -4,32 +4,32 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
     
+    <!-- Satellite simplifié -->
     <path
         android:fillColor="#00D4FF"
-        android:pathData="M12,2l3,3l-3,3l-3,-3l3,-3z"/>
+        android:pathData="M12,2L15,5L12,8L9,5L12,2Z"/>
     
     <path
         android:fillColor="#00D4FF"
-        android:pathData="M4,12l3,3l-3,3l-3,-3l3,-3z"/>
+        android:pathData="M4,12L7,15L4,18L1,15L4,12Z"/>
     
     <path
         android:fillColor="#00D4FF"
-        android:pathData="M20,12l3,3l-3,3l-3,-3l3,-3z"/>
+        android:pathData="M20,12L23,15L20,18L17,15L20,12Z"/>
     
     <path
         android:fillColor="#00D4FF"
-        android:pathData="M12,20l3,3l-3,3l-3,-3l3,-3z"/>
+        android:pathData="M12,20L15,23L12,26L9,23L12,20Z"/>
     
     <!-- Connexions -->
     <path
         android:strokeColor="#00FF88"
         android:strokeWidth="2"
-        android:pathData="M12,8L12,16M8,12L16,12"/>
+        android:pathData="M12,8L12,16M8,12L16,12"
+        android:fillColor="@android:color/transparent"/>
     
     <!-- Centre -->
-    <circle
+    <path
         android:fillColor="#00FF88"
-        android:cx="12"
-        android:cy="12"
-        android:radius="2"/>
+        android:pathData="M12,12m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0"/>
 </vector>

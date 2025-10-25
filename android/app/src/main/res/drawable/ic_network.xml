@@ -4,18 +4,19 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
     
-    <!-- Réseau de points connectés -->
-    <circle android:fillColor="#9D00FF" android:cx="4" android:cy="4" android:radius="2"/>
-    <circle android:fillColor="#9D00FF" android:cx="20" android:cy="4" android:radius="2"/>
-    <circle android:fillColor="#9D00FF" android:cx="4" android:cy="20" android:radius="2"/>
-    <circle android:fillColor="#9D00FF" android:cx="20" android:cy="20" android:radius="2"/>
-    <circle android:fillColor="#00D4FF" android:cx="12" android:cy="12" android:radius="3"/>
+    <!-- Points de réseau -->
+    <path android:fillColor="#9D00FF" android:pathData="M4,4m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0"/>
+    <path android:fillColor="#9D00FF" android:pathData="M20,4m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0"/>
+    <path android:fillColor="#9D00FF" android:pathData="M4,20m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0"/>
+    <path android:fillColor="#9D00FF" android:pathData="M20,20m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0"/>
+    <path android:fillColor="#00D4FF" android:pathData="M12,12m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"/>
     
     <!-- Connexions -->
     <path
         android:strokeColor="#00D4FF"
         android:strokeWidth="2"
-        android:pathData="M4,4L12,12L20,4M4,20L12,12L20,20M4,4L4,20M20,4L20,20"/>
+        android:pathData="M4,4L12,12L20,4M4,20L12,12L20,20M4,4L4,20M20,4L20,20"
+        android:fillColor="@android:color/transparent"/>
     
     <!-- Signal waves -->
     <path
