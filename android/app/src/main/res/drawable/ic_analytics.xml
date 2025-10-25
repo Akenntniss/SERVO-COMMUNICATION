@@ -1,0 +1,31 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- Grille de base -->
+    <path
+        android:strokeColor="#00D4FF"
+        android:strokeWidth="1"
+        android:pathData="M2,2L22,2L22,22L2,22L2,2ZM2,8L22,8M2,14L22,14M8,2L8,22M14,2L14,22"
+        android:fillColor="@android:color/transparent"/>
+    
+    <!-- Barres de données -->
+    <rect android:fillColor="#00FF88" android:x="3" android:y="16" android:width="4" android:height="5"/>
+    <rect android:fillColor="#00D4FF" android:x="9" android:y="12" android:width="4" android:height="9"/>
+    <rect android:fillColor="#9D00FF" android:x="15" android:y="8" android:width="4" android:height="13"/>
+    
+    <!-- Ligne de tendance -->
+    <path
+        android:strokeColor="#00FF88"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M5,18L11,14L17,10"
+        android:fillColor="@android:color/transparent"/>
+    
+    <!-- Points de données -->
+    <circle android:fillColor="#FFFFFF" android:cx="5" android:cy="18" android:radius="1.5"/>
+    <circle android:fillColor="#FFFFFF" android:cx="11" android:cy="14" android:radius="1.5"/>
+    <circle android:fillColor="#FFFFFF" android:cx="17" android:cy="10" android:radius="1.5"/>
+</vector>

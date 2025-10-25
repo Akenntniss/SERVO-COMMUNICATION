@@ -1,0 +1,32 @@
+# Configuration SMS Gateway
+# Copier ce fichier vers config.env et modifier les valeurs selon votre environnement
+
+# Configuration du serveur
+PORT=3001
+NODE_ENV=production
+
+# Configuration de la base de données MySQL
+DB_HOST=168.231.85.4
+DB_USER=smsadmin
+DB_PASSWORD=Maman01#
+DB_NAME=sms_gateway
+DB_SSL=false
+
+# Configuration de l'application Android
+ANDROID_API_URL=http://localhost:3001/api
+
+# Limites et sécurité
+MAX_SMS_PER_BATCH=1000
+DAILY_SMS_LIMIT=10000
+RATE_LIMIT_WINDOW=900000
+RATE_LIMIT_MAX=100
+
+# Logs
+LOG_LEVEL=info
+LOG_FILE=logs/sms-gateway.log
+
+# Monitoring
+HEALTH_CHECK_INTERVAL=30000
+AUTO_REFRESH_DASHBOARD=30000 
+ 
+ 

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Gateway - Gestion des SIMs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="cyberpunk-theme">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <span class="neon-text">SMS</span>Gateway
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="phones.html">Téléphones</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="sims.html">SIMs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="messages.html">Messages</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="autoswitch.html">Auto-Switch</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="settings.html">Configuration</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="docs.html">Documentation</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- En-tête avec actions -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h2 class="neon-text">Gestion des SIMs</h2>
+            </div>
+            <div class="col-md-6 text-end">
+                <button class="btn btn-cyber me-2" data-bs-toggle="modal" data-bs-target="#autoFailoverModal">
+                    <i class="fas fa-exchange-alt"></i> Basculement Auto
+                </button>
+                <button class="btn btn-cyber" data-bs-toggle="modal" data-bs-target="#addSimModal">
+                    <i class="fas fa-plus"></i> Ajouter une SIM
+                </button>
+            </div>
+        </div>
+
+        <!-- Statut du basculement automatique -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="cyber-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="neon-text mb-1">Basculement Automatique</h5>
+                            <p class="mb-0" id="autoFailoverStatus">Chargement...</p>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="autoFailoverToggle">
+                            <label class="form-check-label" for="autoFailoverToggle">
+                                <span id="autoFailoverLabel">Activé</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="cyber-card">
+                    <h3 class="neon-text">SIMs Actives</h3>
+                    <div class="metric" id="activeSimsCount">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="cyber-card">
+                    <h3 class="neon-text">SMS Aujourd'hui</h3>
+                    <div class="metric" id="todaySmsCount">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="cyber-card">
+                    <h3 class="neon-text">Quota Moyen</h3>
+                    <div class="metric" id="averageQuota">0%</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="cyber-card">
+                    <h3 class="neon-text">SIM Par Défaut</h3>
+                    <div class="metric" id="defaultSimInfo">Aucune</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="cyber-card">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <select class="form-select cyber-select" id="statusFilter">
+                                <option value="">Tous les statuts</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select cyber-select" id="defaultFilter">
+                                <option value="">Toutes</option>
+                                <option value="default">Par défaut</option>
+                                <option value="non-default">Non par défaut</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control cyber-input" id="searchInput" placeholder="Rechercher...">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select cyber-select" id="sortBy">
+                                <option value="messages_sent">Messages envoyés</option>
+                                <option value="phone_number">Numéro</option>
+                                <option value="operator">Opérateur</option>
+                                <option value="is_default">Par défaut</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-cyber w-100" id="refreshBtn">
+                                <i class="fas fa-sync"></i> Actualiser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des SIMs -->
+        <div class="row">
+            <div class="col-12">
+                <div class="cyber-card">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover sims-table">
+                            <thead>
+                                <tr>
+                                    <th>Numéro</th>
+                                    <th>Opérateur</th>
+                                    <th>Téléphone</th>
+                                    <th>Statut</th>
+                                    <th>Par Défaut</th>
+                                    <th>Quotas</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="simsList">
+                                <!-- Rempli dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajout SIM -->
+    <div class="modal fade" id="addSimModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content cyber-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title neon-text">Ajouter une SIM</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addSimForm">
+                        <div class="mb-3">
+                            <label class="form-label">Téléphone</label>
+                            <select class="form-select cyber-select" name="device_id" required>
+                                <option value="">Sélectionner un téléphone</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Numéro de téléphone</label>
+                            <input type="text" class="form-control cyber-input" name="phone_number" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Opérateur</label>
+                            <input type="text" class="form-control cyber-input" name="operator">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Limite mensuelle</label>
+                            <input type="number" class="form-control cyber-input" name="monthly_limit" value="30000">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Limite destinataires mensuels</label>
+                            <input type="number" class="form-control cyber-input" name="recipient_limit" value="1000">
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_default" id="addIsDefault">
+                                <label class="form-check-label" for="addIsDefault">
+                                    Définir comme SIM par défaut
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cyber" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-cyber" id="saveSimBtn">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Configuration SIM -->
+    <div class="modal fade" id="configSimModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content cyber-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title neon-text">Configuration SIM</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="configSimForm">
+                        <input type="hidden" name="sim_id">
+                        <div class="mb-3">
+                            <label class="form-label">Statut</label>
+                            <select class="form-select cyber-select" name="status">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Limite mensuelle</label>
+                            <input type="number" class="form-control cyber-input" name="monthly_limit">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Limite destinataires mensuels</label>
+                            <input type="number" class="form-control cyber-input" name="recipient_limit">
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_default" id="isDefault">
+                                <label class="form-check-label" for="isDefault">
+                                    SIM par défaut
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cyber" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-cyber" id="saveConfigBtn">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Modification des Limites -->
+    <div class="modal fade" id="editLimitsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content cyber-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title neon-text">Modifier les Limites d'Envoi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6 class="neon-text mb-2">Informations SIM</h6>
+                        <div class="cyber-card p-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Numéro:</strong><br>
+                                    <span id="editLimitsPhoneNumber">-</span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Opérateur:</strong><br>
+                                    <span id="editLimitsOperator">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form id="editLimitsForm">
+                        <input type="hidden" name="sim_id">
+                        
+                        <div class="mb-4">
+                            <h6 class="neon-text mb-3">Limites d'Envoi</h6>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-sms me-2"></i>Limite mensuelle de SMS
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control cyber-input" 
+                                           name="monthly_limit" min="1" max="100000" required>
+                                    <span class="input-group-text">SMS/mois</span>
+                                </div>
+                                <div class="form-text">
+                                    Nombre maximum de SMS que cette SIM peut envoyer par mois
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-users me-2"></i>Limite mensuelle de destinataires
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control cyber-input" 
+                                           name="recipient_limit" min="1" max="10000" required>
+                                    <span class="input-group-text">destinataires/mois</span>
+                                </div>
+                                <div class="form-text">
+                                    Nombre maximum de destinataires uniques que cette SIM peut contacter par mois
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="neon-text mb-3">Utilisation Actuelle</h6>
+                            <div class="cyber-card p-3">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <small class="text-muted">SMS envoyés ce mois:</small><br>
+                                        <strong id="editLimitsCurrentSms">0</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Destinataires contactés:</small><br>
+                                        <strong id="editLimitsCurrentRecipients">0</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cyber" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Annuler
+                    </button>
+                    <button type="button" class="btn btn-cyber" id="saveLimitsBtn">
+                        <i class="fas fa-save me-1"></i>Enregistrer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Basculement Automatique -->
+    <div class="modal fade" id="autoFailoverModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content cyber-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title neon-text">Configuration du Basculement Automatique</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <h6 class="neon-text">Fonctionnement</h6>
+                        <p class="text-muted">
+                            Le basculement automatique permet de changer automatiquement la SIM par défaut 
+                            vers une autre SIM disponible lorsque la SIM actuelle atteint ses limites 
+                            (messages envoyés ou destinataires contactés).
+                        </p>
+                    </div>
+                    
+                    <form id="autoFailoverForm">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="enableAutoFailover">
+                                <label class="form-check-label" for="enableAutoFailover">
+                                    Activer le basculement automatique
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Seuil de basculement (% de la limite)</label>
+                            <input type="number" class="form-control cyber-input" id="failoverThreshold" 
+                                   min="50" max="100" value="90">
+                            <div class="form-text">
+                                Le basculement se déclenchera quand la SIM atteindra ce pourcentage de ses limites
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Délai de vérification (minutes)</label>
+                            <input type="number" class="form-control cyber-input" id="checkInterval" 
+                                   min="1" max="60" value="5">
+                            <div class="form-text">
+                                Fréquence de vérification des limites des SIMs
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="notifyOnFailover">
+                                <label class="form-check-label" for="notifyOnFailover">
+                                    Envoyer une notification lors du basculement
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-4">
+                        <h6 class="neon-text">Historique des Basculements</h6>
+                        <div id="failoverHistory" class="mt-2">
+                            <!-- Historique rempli dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cyber" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-cyber" id="saveFailoverConfigBtn">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/sims.js"></script>
+</body>
+</html> 
+ 
+ 

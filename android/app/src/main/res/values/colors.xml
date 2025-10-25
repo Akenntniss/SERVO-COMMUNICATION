@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Couleurs principales -->
+    <color name="background_dark">#0F0F23</color>
+    <color name="primary_dark">#1A1A2E</color>
+    <color name="surface">#16213E</color>
+    <color name="surface_dark">#1A1A2E</color>
+    <color name="card_background">#1A1A2E</color>
+    
+    <!-- Couleurs d'accent -->
+    <color name="accent_blue">#00D4FF</color>
+    <color name="accent_purple">#9D00FF</color>
+    <color name="accent_green">#00FF88</color>
+    <color name="accent_orange">#FF6600</color>
+    
+    <!-- Couleurs de texte -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="text_muted">#808080</color>
+    
+    <!-- Couleurs système -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+    
+    <!-- Couleurs d'état -->
+    <color name="success">#00FF88</color>
+    <color name="warning">#FF6600</color>
+    <color name="error">#FF4444</color>
+    <color name="info">#00D4FF</color>
+    
+    <!-- Couleurs Material Design compatibles -->
+    <color name="colorPrimary">@color/accent_blue</color>
+    <color name="colorPrimaryVariant">@color/primary_dark</color>
+    <color name="colorOnPrimary">@color/white</color>
+    <color name="colorSecondary">@color/accent_green</color>
+    <color name="colorSecondaryVariant">@color/accent_purple</color>
+    <color name="colorOnSecondary">@color/white</color>
+    <color name="colorBackground">@color/background_dark</color>
+    <color name="colorOnBackground">@color/text_primary</color>
+    <color name="colorSurface">@color/surface</color>
+    <color name="colorOnSurface">@color/text_primary</color>
+    <color name="colorError">@color/error</color>
+    <color name="colorOnError">@color/white</color>
+</resources> 
+ 
+ 

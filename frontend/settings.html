@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Gateway - Configuration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="cyberpunk-theme">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <span class="neon-text">SMS</span>Gateway
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="phones.html">Téléphones</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sims.html">SIMs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="messages.html">Messages</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="autoswitch.html">Auto-Switch</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="settings.html">Configuration</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/download/" target="_blank">
+                            <i class="fas fa-download"></i> Télécharger APK
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- En-tête -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="neon-text">Configuration Système</h2>
+            </div>
+        </div>
+
+        <!-- Onglets de configuration -->
+        <div class="row">
+            <div class="col-12">
+                <ul class="nav nav-tabs cyber-tabs" id="configTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">
+                            <i class="fas fa-cog"></i> Général
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
+                            <i class="fas fa-bell"></i> Notifications
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
+                            <i class="fas fa-shield-alt"></i> Sécurité
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="monitoring-tab" data-bs-toggle="tab" data-bs-target="#monitoring" type="button" role="tab">
+                            <i class="fas fa-chart-line"></i> Monitoring
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content cyber-card mt-0" id="configTabContent">
+                    <!-- Onglet Général -->
+                    <div class="tab-pane fade show active" id="general" role="tabpanel">
+                        <h3 class="neon-text mb-4">Paramètres Généraux</h3>
+                        <form id="generalForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">SIM par défaut</label>
+                                        <select class="form-select cyber-select" name="default_sim_id">
+                                            <option value="">Aucune</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Basculement automatique</label>
+                                        <select class="form-select cyber-select" name="auto_switch_enabled">
+                                            <option value="true">Activé</option>
+                                            <option value="false">Désactivé</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Limite API (requêtes/minute)</label>
+                                        <input type="number" class="form-control cyber-input" name="api_rate_limit" value="100">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Intervalle heartbeat (secondes)</label>
+                                        <input type="number" class="form-control cyber-input" name="heartbeat_interval" value="30">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Limite quotidienne globale</label>
+                                        <input type="number" class="form-control cyber-input" name="global_daily_limit" value="1000">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Timeout connexion (secondes)</label>
+                                        <input type="number" class="form-control cyber-input" name="connection_timeout" value="60">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-cyber">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Onglet Notifications -->
+                    <div class="tab-pane fade" id="notifications" role="tabpanel">
+                        <h3 class="neon-text mb-4">Paramètres de Notifications</h3>
+                        <form id="notificationsForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="notifications_enabled" id="notificationsEnabled">
+                                            <label class="form-check-label" for="notificationsEnabled">
+                                                Notifications activées
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Email d'alerte</label>
+                                        <input type="email" class="form-control cyber-input" name="alert_email">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Seuil d'alerte quota (%)</label>
+                                        <input type="number" class="form-control cyber-input" name="quota_alert_threshold" value="80">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Webhook URL</label>
+                                        <input type="url" class="form-control cyber-input" name="webhook_url">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Délai alerte déconnexion (minutes)</label>
+                                        <input type="number" class="form-control cyber-input" name="disconnection_alert_delay" value="5">
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="daily_report_enabled" id="dailyReportEnabled">
+                                            <label class="form-check-label" for="dailyReportEnabled">
+                                                Rapport quotidien activé
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-cyber">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Onglet Sécurité -->
+                    <div class="tab-pane fade" id="security" role="tabpanel">
+                        <h3 class="neon-text mb-4">Paramètres de Sécurité</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="cyber-card mb-3">
+                                    <h4 class="neon-text">Gestion des Utilisateurs</h4>
+                                    <button class="btn btn-cyber mb-3" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                                        <i class="fas fa-user-plus"></i> Ajouter un utilisateur
+                                    </button>
+                                    <div class="table-responsive">
+                                        <table class="table table-dark">
+                                            <thead>
+                                                <tr>
+                                                    <th>Utilisateur</th>
+                                                    <th>Rôle</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="usersList">
+                                                <!-- Rempli dynamiquement -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="cyber-card mb-3">
+                                    <h4 class="neon-text">Clés API</h4>
+                                    <button class="btn btn-cyber mb-3" id="generateApiKey">
+                                        <i class="fas fa-key"></i> Générer une nouvelle clé
+                                    </button>
+                                    <div id="apiKeysList">
+                                        <!-- Rempli dynamiquement -->
+                                    </div>
+                                </div>
+                                <div class="cyber-card">
+                                    <h4 class="neon-text">Changement de mot de passe</h4>
+                                    <form id="changePasswordForm">
+                                        <div class="mb-3">
+                                            <label class="form-label">Mot de passe actuel</label>
+                                            <input type="password" class="form-control cyber-input" name="current_password" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Nouveau mot de passe</label>
+                                            <input type="password" class="form-control cyber-input" name="new_password" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Confirmer le mot de passe</label>
+                                            <input type="password" class="form-control cyber-input" name="confirm_password" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-cyber">
+                                            <i class="fas fa-lock"></i> Changer le mot de passe
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Onglet Monitoring -->
+                    <div class="tab-pane fade" id="monitoring" role="tabpanel">
+                        <h3 class="neon-text mb-4">Monitoring Système</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="cyber-card mb-3">
+                                    <h4 class="neon-text">État des Services</h4>
+                                    <div id="servicesStatus">
+                                        <!-- État des services -->
+                                    </div>
+                                </div>
+                                <div class="cyber-card">
+                                    <h4 class="neon-text">Utilisation des Ressources</h4>
+                                    <div class="mb-3">
+                                        <label>CPU</label>
+                                        <div class="progress cyber-progress">
+                                            <div class="progress-bar" id="cpuUsage" style="width: 0%">0%</div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Mémoire</label>
+                                        <div class="progress cyber-progress">
+                                            <div class="progress-bar" id="memoryUsage" style="width: 0%">0%</div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Disque</label>
+                                        <div class="progress cyber-progress">
+                                            <div class="progress-bar" id="diskUsage" style="width: 0%">0%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="cyber-card mb-3">
+                                    <h4 class="neon-text">Logs Système</h4>
+                                    <div class="mb-3">
+                                        <select class="form-select cyber-select" id="logLevel">
+                                            <option value="all">Tous</option>
+                                            <option value="error">Erreurs</option>
+                                            <option value="warning">Avertissements</option>
+                                            <option value="info">Info</option>
+                                        </select>
+                                    </div>
+                                    <div id="systemLogs" class="logs-container">
+                                        <!-- Logs système -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajout Utilisateur -->
+    <div class="modal fade" id="addUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content cyber-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title neon-text">Ajouter un utilisateur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUserForm">
+                        <div class="mb-3">
+                            <label class="form-label">Nom d'utilisateur</label>
+                            <input type="text" class="form-control cyber-input" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control cyber-input" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mot de passe</label>
+                            <input type="password" class="form-control cyber-input" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Rôle</label>
+                            <select class="form-select cyber-select" name="role">
+                                <option value="user">Utilisateur</option>
+                                <option value="admin">Administrateur</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cyber" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-cyber" id="saveUserBtn">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/settings.js"></script>
+</body>
+</html> 

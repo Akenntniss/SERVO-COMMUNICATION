@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/cyber_background"
+    tools:context=".ui.MainActivity">
+
+    <!-- Header Futuriste -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:orientation="vertical"
+        android:background="@drawable/cyber_header_bg"
+        android:gravity="center"
+        android:paddingTop="24dp">
+
+        <!-- Logo/Icône Cybernétique -->
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_satellite"
+            android:layout_marginBottom="8dp"
+            android:tint="@color/accent_blue" />
+
+        <!-- Titre Principal -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SERVO COMMUNICATION"
+            android:textColor="@color/accent_blue"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:letterSpacing="0.1"
+            android:shadowColor="@color/accent_blue"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="8" />
+
+        <!-- Version Badge -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="v1.5 - INTERFACE FUTURISTE"
+            android:textColor="@color/accent_green"
+            android:textSize="10sp"
+            android:fontFamily="monospace"
+            android:layout_marginTop="4dp"
+            android:alpha="0.8" />
+
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="120dp"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Panneau de Contrôle Cybernétique -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/cyber_panel_bg"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Header du panneau -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_power"
+                        android:tint="@color/accent_green"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="// SYSTÈME DE CONTRÔLE"
+                        android:textColor="@color/accent_green"
+                        android:textSize="14sp"
+                        android:fontFamily="monospace"
+                        android:textStyle="bold" />
+
+                    <!-- Indicateur LED -->
+                    <View
+                        android:id="@+id/statusLed"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:background="@drawable/led_indicator"
+                        android:backgroundTint="@color/error" />
+
+                </LinearLayout>
+
+                <!-- Status Display -->
+                <TextView
+                    android:id="@+id/tvServiceStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="► SYSTÈME: OFFLINE"
+                    android:textColor="@color/accent_blue"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Bouton d'activation futuriste -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnToggleService"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="[ ACTIVER SYSTÈME ]"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace"
+                    android:backgroundTint="@color/accent_green"
+                    app:cornerRadius="4dp"
+                    app:strokeColor="@color/accent_blue"
+                    app:strokeWidth="2dp" />
+
+            </LinearLayout>
+
+            <!-- Panneau de Connexion Réseau -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/cyber_panel_bg"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_network"
+                        android:tint="@color/accent_purple"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="// CONNEXION RÉSEAU"
+                        android:textColor="@color/accent_purple"
+                        android:textSize="14sp"
+                        android:fontFamily="monospace"
+                        android:textStyle="bold" />
+
+                    <View
+                        android:id="@+id/networkLed"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:background="@drawable/led_indicator"
+                        android:backgroundTint="@color/warning" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvConnectionStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="◄ SERVEUR: DÉCONNECTÉ"
+                    android:textColor="@color/warning"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace" />
+
+            </LinearLayout>
+
+            <!-- Panneau Statistiques Temps Réel -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/cyber_panel_bg"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_analytics"
+                        android:tint="@color/accent_blue"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="// ANALYTICS TEMPS RÉEL"
+                        android:textColor="@color/accent_blue"
+                        android:textSize="14sp"
+                        android:fontFamily="monospace"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvMessagesSent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="▶ MSG ENVOYÉS: 000"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp"
+                        android:fontFamily="monospace"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvActiveSims"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="▶ SIMS ACTIVES: 0"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp"
+                        android:fontFamily="monospace" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Panneau de Gestion SIMs -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/cyber_panel_bg"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_sim_card"
+                        android:tint="@color/accent_green"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="// SIMS DÉTECTÉES"
+                        android:textColor="@color/accent_green"
+                        android:textSize="14sp"
+                        android:fontFamily="monospace"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="READY"
+                        android:textColor="@color/success"
+                        android:textSize="10sp"
+                        android:fontFamily="monospace"
+                        android:background="@drawable/status_badge"
+                        android:padding="4dp" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvSimsInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="◆ SCAN EN COURS..."
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:fontFamily="monospace"
+                    android:lineSpacingExtra="6dp" />
+
+            </LinearLayout>
+
+            <!-- Console de Commandes -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnRefresh"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="10dp"
+                    android:text="[ SCAN ]"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace"
+                    android:backgroundTint="@color/accent_green"
+                    app:cornerRadius="4dp"
+                    app:strokeColor="@color/accent_blue"
+                    app:strokeWidth="1dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSettings"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:text="[ CONFIG ]"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace"
+                    android:backgroundTint="@color/accent_purple"
+                    app:cornerRadius="4dp"
+                    app:strokeColor="@color/accent_blue"
+                    app:strokeWidth="1dp" />
+
+            </LinearLayout>
+
+            <!-- Footer Signature -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="● SERVO COMMUNICATION v1.5 - INTERFACE FUTURISTE ●"
+                android:textColor="@color/accent_blue"
+                android:textSize="10sp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:layout_marginTop="32dp"
+                android:alpha="0.6" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout> 
+ 
+ 

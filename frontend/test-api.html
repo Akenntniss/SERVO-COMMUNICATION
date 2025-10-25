@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Gateway - Test API</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .test-result {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--accent-blue);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { border-color: var(--neon-green); }
+        .error { border-color: #dc3545; }
+        .endpoint-test {
+            background: rgba(0, 255, 255, 0.1);
+            border-left: 4px solid var(--accent-blue);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body class="cyberpunk-theme">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <span class="neon-text">SMS</span>Gateway
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="phones.html">Téléphones</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sims.html">SIMs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="messages.html">Messages</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="autoswitch.html">Auto-Switch</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="settings.html">Configuration</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="docs.html">Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="test-api.html">Test API</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/download/" target="_blank">
+                            <i class="fas fa-download"></i> Télécharger APK
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="neon-text mb-4">
+                    <i class="fas fa-flask"></i> Test Interactif de l'API
+                </h1>
+                <p class="text-secondary mb-4">
+                    Testez les différents endpoints de l'API SMS Gateway en temps réel
+                </p>
+            </div>
+        </div>
+
+        <!-- Configuration -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="cyber-card">
+                    <h3 class="neon-text mb-3">Configuration</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">URL de base de l'API</label>
+                            <input type="text" class="form-control cyber-input" id="apiBaseUrl" value="http://168.231.85.4:3001/api">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Statut de l'API</label>
+                            <div class="d-flex align-items-center">
+                                <span id="apiStatus" class="badge bg-secondary me-2">Non testé</span>
+                                <button class="btn btn-cyber btn-sm" onclick="checkApiHealth()">
+                                    <i class="fas fa-heartbeat"></i> Vérifier
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tests des endpoints -->
+        <div class="row">
+            <!-- Test Health -->
+            <div class="col-lg-6 mb-4">
+                <div class="endpoint-test">
+                    <h4><span class="badge bg-success">GET</span> /health</h4>
+                    <p>Vérification de l'état de santé de l'API</p>
+                    <button class="btn btn-cyber btn-sm" onclick="testHealth()">
+                        <i class="fas fa-play"></i> Tester
+                    </button>
+                    <div id="healthResult" class="test-result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Test Phones -->
+            <div class="col-lg-6 mb-4">
+                <div class="endpoint-test">
+                    <h4><span class="badge bg-success">GET</span> /phones</h4>
+                    <p>Récupération de la liste des téléphones connectés</p>
+                    <button class="btn btn-cyber btn-sm" onclick="testPhones()">
+                        <i class="fas fa-play"></i> Tester
+                    </button>
+                    <div id="phonesResult" class="test-result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Test SIMs -->
+            <div class="col-lg-6 mb-4">
+                <div class="endpoint-test">
+                    <h4><span class="badge bg-success">GET</span> /sims</h4>
+                    <p>Récupération de la liste des SIMs et leurs quotas</p>
+                    <button class="btn btn-cyber btn-sm" onclick="testSims()">
+                        <i class="fas fa-play"></i> Tester
+                    </button>
+                    <div id="simsResult" class="test-result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Test Auto-Switch Status -->
+            <div class="col-lg-6 mb-4">
+                <div class="endpoint-test">
+                    <h4><span class="badge bg-success">GET</span> /autoswitch/status</h4>
+                    <p>Statut du système de basculement automatique</p>
+                    <button class="btn btn-cyber btn-sm" onclick="testAutoSwitch()">
+                        <i class="fas fa-play"></i> Tester
+                    </button>
+                    <div id="autoswitchResult" class="test-result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Test Send SMS -->
+            <div class="col-12 mb-4">
+                <div class="endpoint-test">
+                    <h4><span class="badge bg-primary">POST</span> /messages/send</h4>
+                    <p>Envoi d'un SMS via l'API</p>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Destinataire</label>
+                            <input type="tel" class="form-control cyber-input" id="testRecipient" placeholder="+33612345678">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Message</label>
+                            <input type="text" class="form-control cyber-input" id="testMessage" placeholder="Message de test" maxlength="160">
+                        </div>
+                    </div>
+                    <button class="btn btn-cyber btn-sm" onclick="testSendSMS()">
+                        <i class="fas fa-paper-plane"></i> Envoyer SMS de Test
+                    </button>
+                    <div id="sendSmsResult" class="test-result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Test Messages History -->
+            <div class="col-12 mb-4">
+                <div class="endpoint-test">
+                    <h4><span class="badge bg-success">GET</span> /messages/history</h4>
+                    <p>Récupération de l'historique des messages</p>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Limite</label>
+                            <input type="number" class="form-control cyber-input" id="historyLimit" value="5" min="1" max="100">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Décalage</label>
+                            <input type="number" class="form-control cyber-input" id="historyOffset" value="0" min="0">
+                        </div>
+                    </div>
+                    <button class="btn btn-cyber btn-sm" onclick="testHistory()">
+                        <i class="fas fa-play"></i> Tester
+                    </button>
+                    <div id="historyResult" class="test-result" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exemples de code -->
+        <div class="row">
+            <div class="col-12">
+                <div class="cyber-card">
+                    <h3 class="neon-text mb-3">
+                        <i class="fas fa-code"></i> Exemples de Code Générés
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-info">JavaScript (Fetch)</h5>
+                            <div class="test-result">
+                                <pre id="jsExample">// Cliquez sur "Tester" pour générer le code</pre>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-info">cURL</h5>
+                            <div class="test-result">
+                                <pre id="curlExample"># Cliquez sur "Tester" pour générer le code</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let lastEndpoint = '';
+        let lastMethod = '';
+        let lastData = null;
+
+        function getApiBase() {
+            return document.getElementById('apiBaseUrl').value;
+        }
+
+        function updateStatus(status, className) {
+            const statusEl = document.getElementById('apiStatus');
+            statusEl.textContent = status;
+            statusEl.className = `badge ${className} me-2`;
+        }
+
+        function showResult(elementId, data, success = true) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `test-result ${success ? 'success' : 'error'}`;
+            element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        function updateCodeExamples(endpoint, method, data = null) {
+            lastEndpoint = endpoint;
+            lastMethod = method;
+            lastData = data;
+
+            const baseUrl = getApiBase();
+            const fullUrl = `${baseUrl}${endpoint}`;
+
+            // JavaScript example
+            let jsCode = '';
+            if (method === 'GET') {
+                jsCode = `// Récupération des données
+fetch('${fullUrl}')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Succès:', data);
+  })
+  .catch(error => {
+    console.error('Erreur:', error);
+  });`;
+            } else if (method === 'POST') {
+                jsCode = `// Envoi de données
+fetch('${fullUrl}', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(${JSON.stringify(data, null, 2)})
+})
+  .then(response => response.json())
+  .then(data => {
+    console.log('Succès:', data);
+  })
+  .catch(error => {
+    console.error('Erreur:', error);
+  });`;
+            }
+
+            // cURL example
+            let curlCode = '';
+            if (method === 'GET') {
+                curlCode = `# Récupération des données
+curl -X GET "${fullUrl}" \\
+  -H "Accept: application/json"`;
+            } else if (method === 'POST') {
+                curlCode = `# Envoi de données
+curl -X POST "${fullUrl}" \\
+  -H "Content-Type: application/json" \\
+  -d '${JSON.stringify(data)}'`;
+            }
+
+            document.getElementById('jsExample').textContent = jsCode;
+            document.getElementById('curlExample').textContent = curlCode;
+        }
+
+        async function makeRequest(endpoint, method = 'GET', data = null) {
+            const url = `${getApiBase()}${endpoint}`;
+            
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(url, options);
+                const result = await response.json();
+                
+                updateCodeExamples(endpoint, method, data);
+                return { success: true, data: result };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function checkApiHealth() {
+            const result = await makeRequest('/health');
+            if (result.success) {
+                updateStatus('En ligne', 'bg-success');
+            } else {
+                updateStatus('Hors ligne', 'bg-danger');
+            }
+        }
+
+        async function testHealth() {
+            const result = await makeRequest('/health');
+            showResult('healthResult', result.success ? result.data : result.error, result.success);
+        }
+
+        async function testPhones() {
+            const result = await makeRequest('/phones');
+            showResult('phonesResult', result.success ? result.data : result.error, result.success);
+        }
+
+        async function testSims() {
+            const result = await makeRequest('/sims');
+            showResult('simsResult', result.success ? result.data : result.error, result.success);
+        }
+
+        async function testAutoSwitch() {
+            const result = await makeRequest('/autoswitch/status');
+            showResult('autoswitchResult', result.success ? result.data : result.error, result.success);
+        }
+
+        async function testSendSMS() {
+            const recipient = document.getElementById('testRecipient').value;
+            const message = document.getElementById('testMessage').value;
+
+            if (!recipient || !message) {
+                showResult('sendSmsResult', { error: 'Veuillez remplir le destinataire et le message' }, false);
+                return;
+            }
+
+            const data = { recipient, message };
+            const result = await makeRequest('/messages/send', 'POST', data);
+            showResult('sendSmsResult', result.success ? result.data : result.error, result.success);
+        }
+
+        async function testHistory() {
+            const limit = document.getElementById('historyLimit').value;
+            const offset = document.getElementById('historyOffset').value;
+            
+            const endpoint = `/messages/history?limit=${limit}&offset=${offset}`;
+            const result = await makeRequest(endpoint);
+            showResult('historyResult', result.success ? result.data : result.error, result.success);
+        }
+
+        // Vérification automatique au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            checkApiHealth();
+        });
+    </script>
+</body>
+</html> 

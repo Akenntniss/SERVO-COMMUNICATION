@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/background_dark">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SMS Gateway"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/accent_blue"
+        android:gravity="center"
+        android:layout_marginBottom="32dp" />
+
+    <TextView
+        android:id="@+id/tvServiceStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Service: Inactif"
+        android:textSize="18sp"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/btnConfigureService"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="⚙️ Configurer le service"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/accent_purple"
+        android:layout_marginBottom="8dp" />
+
+    <Button
+        android:id="@+id/btnToggleService"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Démarrer le service"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/accent_blue"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/tvConnectionStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Connexion: Déconnecté"
+        android:textSize="16sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvServerInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🏠 Serveur Local: 192.168.1.155:3001"
+        android:textSize="14sp"
+        android:textColor="@color/text_muted"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/tvMessagesSent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Messages envoyés aujourd'hui: 0"
+        android:textSize="16sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/tvActiveSims"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SIMs actives: 0"
+        android:textSize="16sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🔄 Initialisation..."
+        android:textSize="16sp"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/tvPhoneInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Informations du téléphone"
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/tvSimsInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Aucune SIM détectée"
+        android:textSize="14sp"
+        android:textColor="@color/text_muted"
+        android:layout_marginBottom="32dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/btnRefresh"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Actualiser"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/accent_green"
+            android:layout_marginEnd="4dp" />
+
+        <Button
+            android:id="@+id/btnSettings"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Configuration"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/accent_purple"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp" />
+
+        <Button
+            android:id="@+id/btnManageSims"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🔧 SIM"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/accent_blue"
+            android:layout_marginStart="4dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/btnSyncSims"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔄 Synchroniser SIM"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/accent_orange"
+            android:layout_marginBottom="8dp" />
+
+    </LinearLayout>
+
+</LinearLayout> 

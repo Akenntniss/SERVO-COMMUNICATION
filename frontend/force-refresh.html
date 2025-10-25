@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 Mise à Jour Forcée</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid #00ff41;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+        }
+        .spinner {
+            border: 3px solid #333;
+            border-top: 3px solid #00ff41;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .progress-bar {
+            width: 300px;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            margin: 20px auto;
+            overflow: hidden;
+            border: 1px solid #00ff41;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff41, #00cc33);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        .status {
+            margin: 15px 0;
+            font-size: 14px;
+            color: #00cc33;
+        }
+        h1 {
+            color: #00ff41;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Mise à Jour du Système</h1>
+        <div class="spinner"></div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="status" id="status">Initialisation...</div>
+        <p>Nettoyage du cache et mise à jour vers la nouvelle IP</p>
+        <small>168.231.85.4:3001</small>
+    </div>
+
+    <script>
+        let progress = 0;
+        const statusEl = document.getElementById('status');
+        const progressFill = document.getElementById('progressFill');
+        
+        const steps = [
+            { text: "🗑️ Nettoyage du cache navigateur...", duration: 1000 },
+            { text: "🔄 Suppression des données locales...", duration: 800 },
+            { text: "🌐 Mise à jour de la configuration IP...", duration: 1200 },
+            { text: "📡 Test de connexion au nouveau serveur...", duration: 1500 },
+            { text: "✅ Redirection vers le dashboard...", duration: 500 }
+        ];
+        
+        async function updateProgress(step, index) {
+            statusEl.textContent = step.text;
+            progress = ((index + 1) / steps.length) * 100;
+            progressFill.style.width = progress + '%';
+            
+            // Actions de nettoyage
+            if (index === 0) {
+                // Nettoyage du cache
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                }
+            } else if (index === 1) {
+                // Nettoyage des données locales
+                localStorage.clear();
+                sessionStorage.clear();
+                if ('indexedDB' in window) {
+                    // Nettoyage IndexedDB si présent
+                    try {
+                        const databases = await indexedDB.databases();
+                        await Promise.all(databases.map(db => {
+                            return new Promise((resolve) => {
+                                const deleteReq = indexedDB.deleteDatabase(db.name);
+                                deleteReq.onsuccess = () => resolve();
+                                deleteReq.onerror = () => resolve();
+                            });
+                        }));
+                    } catch (e) {
+                        console.log('IndexedDB cleanup skipped');
+                    }
+                }
+            } else if (index === 3) {
+                // Test de connexion
+                try {
+                    const response = await fetch('http://168.231.85.4:3001/api/health?v=' + Date.now());
+                    if (!response.ok) throw new Error('Server not responding');
+                } catch (e) {
+                    console.warn('Server test failed, but continuing...');
+                }
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, step.duration));
+        }
+        
+        async function runUpdate() {
+            for (let i = 0; i < steps.length; i++) {
+                await updateProgress(steps[i], i);
+            }
+            
+            // Redirection avec paramètres de cache-busting
+            const timestamp = Date.now();
+            window.location.href = `index.html?v=${timestamp}&cache=clear&ip=168.231.85.4`;
+        }
+        
+        // Démarrer la mise à jour après 1 seconde
+        setTimeout(runUpdate, 1000);
+    </script>
+</body>
+</html> 

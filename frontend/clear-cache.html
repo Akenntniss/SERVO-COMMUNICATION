@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mise à jour du cache...</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .loading {
+            text-align: center;
+        }
+        .spinner {
+            border: 2px solid #333;
+            border-top: 2px solid #00ff41;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">
+        <h2>🔄 Mise à jour du cache en cours...</h2>
+        <div class="spinner"></div>
+        <p>Redirection automatique vers la page des téléphones...</p>
+    </div>
+
+    <script>
+        // Forcer le rechargement du cache
+        if ('caches' in window) {
+            caches.keys().then(function(names) {
+                names.forEach(function(name) {
+                    caches.delete(name);
+                });
+            });
+        }
+        
+        // Vider le localStorage et sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Rediriger vers la page phones après 3 secondes
+        setTimeout(function() {
+            window.location.href = 'phones.html?v=' + Date.now();
+        }, 3000);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Switch - SMS Gateway</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="cyberpunk-theme">
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-mobile-alt"></i>
+                SMS Gateway
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">
+                        <i class="fas fa-home"></i> Accueil
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="messages.html" class="nav-link">
+                        <i class="fas fa-envelope"></i> Messages
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="phones.html" class="nav-link">
+                        <i class="fas fa-mobile-alt"></i> Téléphones
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="sims.html" class="nav-link">
+                        <i class="fas fa-sim-card"></i> SIMs
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="autoswitch.html" class="nav-link active">
+                        <i class="fas fa-exchange-alt"></i> Auto-Switch
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="docs.html" class="nav-link">
+                        <i class="fas fa-book"></i> Documentation
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-exchange-alt"></i> Basculement Automatique</h1>
+            <p>Configuration du basculement automatique entre cartes SIM</p>
+        </div>
+
+        <!-- Statut du système -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-info-circle"></i> Statut du Système</h2>
+                <button id="refreshStatusBtn" class="btn btn-cyber btn-sm">
+                    <i class="fas fa-sync-alt"></i> Actualiser
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="systemStatus" class="status-container">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Chargement du statut...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration principale -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-cogs"></i> Configuration</h2>
+            </div>
+            <div class="card-body">
+                <form id="autoSwitchForm">
+                    <!-- Activation/Désactivation -->
+                    <div class="form-group">
+                        <label class="switch-label">
+                            <input type="checkbox" id="autoSwitchEnabled" class="switch-input">
+                            <span class="switch-slider"></span>
+                            <span class="switch-text">Activer le basculement automatique</span>
+                        </label>
+                        <small class="form-help">
+                            Bascule automatiquement vers une autre SIM lorsque la SIM par défaut atteint son quota
+                        </small>
+                    </div>
+
+                    <!-- Seuil d'alerte -->
+                    <div class="form-group">
+                        <label for="quotaThreshold">Seuil d'alerte quota (%)</label>
+                        <div class="input-group">
+                            <input type="number" id="quotaThreshold" min="1" max="100" value="80" required>
+                            <span class="input-suffix">%</span>
+                        </div>
+                        <small class="form-help">
+                            Déclenche l'alerte et le basculement lorsque ce pourcentage est atteint
+                        </small>
+                    </div>
+
+                    <!-- Notifications SMS -->
+                    <div class="form-group">
+                        <label class="switch-label">
+                            <input type="checkbox" id="smsNotificationsEnabled" class="switch-input">
+                            <span class="switch-slider"></span>
+                            <span class="switch-text">Notification par SMS lors d'alerte quota</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="switch-label">
+                            <input type="checkbox" id="switchNotificationsEnabled" class="switch-input">
+                            <span class="switch-slider"></span>
+                            <span class="switch-text">Notification par SMS lors de basculement</span>
+                        </label>
+                    </div>
+
+                    <!-- Numéro pour notifications -->
+                    <div class="form-group">
+                        <label for="notificationPhone">Numéro pour les notifications SMS</label>
+                        <input type="tel" id="notificationPhone" placeholder="+33612345678">
+                        <small class="form-help">
+                            Numéro qui recevra les notifications d'alerte et de basculement
+                        </small>
+                    </div>
+
+                    <!-- Fréquence de vérification -->
+                    <div class="form-group">
+                        <label for="checkFrequency">Fréquence de vérification des quotas (secondes)</label>
+                        <div class="input-group">
+                            <input type="number" id="checkFrequency" min="30" value="180" required>
+                            <span class="input-suffix">sec</span>
+                        </div>
+                        <small class="form-help">
+                            Intervalle entre chaque vérification des quotas (minimum 30 secondes, recommandé: 180 secondes)
+                        </small>
+                    </div>
+
+                    <!-- Boutons d'action -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-cyber">
+                            <i class="fas fa-save"></i> Sauvegarder la Configuration
+                        </button>
+                        <button type="button" id="testNotificationBtn" class="btn btn-secondary">
+                            <i class="fas fa-paper-plane"></i> Tester les Notifications
+                        </button>
+                        <button type="button" id="manualSwitchBtn" class="btn btn-warning">
+                            <i class="fas fa-exchange-alt"></i> Basculement Manuel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Informations sur les SIMs -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-sim-card"></i> État des SIMs</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover sims-table">
+                        <thead>
+                            <tr>
+                                <th>SIM</th>
+                                <th>Numéro</th>
+                                <th>Opérateur</th>
+                                <th>Statut</th>
+                                <th>SMS</th>
+                                <th>Destinataires</th>
+                                <th>Quota Max</th>
+                            </tr>
+                        </thead>
+                        <tbody id="simsStatus">
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <div class="loading">
+                                        <i class="fas fa-spinner fa-spin"></i> Chargement des SIMs...
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de test de notification -->
+    <div id="testNotificationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-paper-plane"></i> Test de Notification</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="testNotificationForm">
+                    <div class="form-group">
+                        <label for="testPhoneNumber">Numéro de téléphone</label>
+                        <input type="tel" id="testPhoneNumber" placeholder="+33612345678" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="testMessageType">Type de notification</label>
+                        <select id="testMessageType" required>
+                            <option value="general">Test général</option>
+                            <option value="quota_alert">Alerte quota</option>
+                            <option value="switch_notification">Notification de basculement</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-cyber">
+                            <i class="fas fa-paper-plane"></i> Envoyer Test
+                        </button>
+                        <button type="button" class="btn btn-secondary modal-cancel">
+                            Annuler
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/autoswitch.js"></script>
+</body>
+</html> 

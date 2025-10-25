@@ -1,0 +1,905 @@
+:root {
+    --bg-dark: #0F0F23;
+    --card-bg: #1A1A2E;
+    --accent-blue: #00D4FF;
+    --accent-purple: #9D00FF;
+    --accent-green: #00FF88;
+    --accent-orange: #FF6600;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B8B8B8;
+}
+
+body.cyberpunk-theme {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    padding: 1rem;
+}
+
+.navbar-brand {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    color: var(--text-primary) !important;
+}
+
+.neon-text {
+    color: var(--accent-blue);
+    text-shadow: 0 0 5px var(--accent-blue),
+                 0 0 10px var(--accent-blue),
+                 0 0 20px var(--accent-blue);
+}
+
+.nav-link {
+    color: var(--text-secondary) !important;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--accent-blue) !important;
+    text-shadow: 0 0 5px var(--accent-blue);
+}
+
+/* Cards */
+.cyber-card {
+    background-color: var(--card-bg);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.cyber-card:hover {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Metrics */
+.metric {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    color: var(--accent-blue);
+    text-shadow: 0 0 10px var(--accent-blue);
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.metric + h3 {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+/* Tables */
+.table {
+    color: var(--text-primary);
+    border-color: rgba(0, 212, 255, 0.2);
+}
+
+.table-dark {
+    background-color: transparent;
+}
+
+.table-dark thead th {
+    border-bottom: 2px solid var(--accent-blue);
+    color: var(--accent-blue);
+}
+
+.table-dark tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table-dark tbody tr:hover {
+    background-color: rgba(0, 212, 255, 0.1);
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-online {
+    background-color: var(--accent-green);
+    box-shadow: 0 0 10px var(--accent-green);
+}
+
+.status-offline {
+    background-color: var(--accent-orange);
+    box-shadow: 0 0 10px var(--accent-orange);
+}
+
+/* Buttons */
+.btn-cyber {
+    background-color: transparent;
+    border: 1px solid var(--accent-blue);
+    color: var(--accent-blue);
+    font-family: 'Orbitron', sans-serif;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-cyber:hover {
+    background-color: var(--accent-blue);
+    color: var(--bg-dark);
+    box-shadow: 0 0 15px var(--accent-blue);
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Styles pour la page des SIMs */
+.cyber-progress {
+    background-color: var(--card-bg);
+    border: 1px solid var(--accent-blue);
+    height: 20px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.cyber-progress .progress-bar {
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+    border-right: 1px solid var(--accent-blue);
+    box-shadow: 0 0 10px var(--accent-blue);
+    transition: width 0.3s ease;
+}
+
+.form-check-input {
+    background-color: var(--card-bg);
+    border: 1px solid var(--accent-blue);
+}
+
+.form-check-input:checked {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 10px var(--accent-blue);
+}
+
+/* Styles pour les statistiques */
+.metric {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    color: var(--accent-blue);
+    text-shadow: 0 0 10px var(--accent-blue);
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.metric + h3 {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+/* Styles pour les modals */
+.cyber-modal .modal-content {
+    background-color: var(--card-bg);
+    border: 1px solid var(--accent-blue);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+}
+
+.cyber-modal .modal-header {
+    border-bottom: 1px solid var(--accent-blue);
+    padding: 1rem;
+}
+
+.cyber-modal .modal-footer {
+    border-top: 1px solid var(--accent-blue);
+    padding: 1rem;
+}
+
+.cyber-modal .form-label {
+    color: var(--text-secondary);
+    font-family: 'Space Mono', monospace;
+}
+
+/* Animations pour les boutons d'action */
+.btn-cyber.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-cyber.btn-sm i {
+    font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .metric {
+        font-size: 2rem;
+    }
+    
+    .cyber-card {
+        padding: 1rem;
+    }
+    
+    .table-responsive {
+        margin: 0 -1rem;
+    }
+    
+    .phone-actions {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .btn-cyber.btn-sm {
+        width: 100%;
+    }
+}
+
+/* Styles pour la page de configuration */
+.cyber-tabs {
+    border-bottom: 2px solid var(--accent-blue);
+    background-color: transparent;
+}
+
+.cyber-tabs .nav-link {
+    color: var(--text-secondary);
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0;
+    padding: 0.75rem 1.5rem;
+    font-family: 'Orbitron', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.cyber-tabs .nav-link:hover {
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    background-color: rgba(0, 212, 255, 0.1);
+}
+
+.cyber-tabs .nav-link.active {
+    color: var(--accent-blue);
+    background-color: var(--card-bg);
+    border-color: var(--accent-blue) var(--accent-blue) var(--card-bg);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.tab-content {
+    border-radius: 0 0 8px 8px;
+    border-top: none;
+}
+
+/* Styles pour les logs */
+.logs-container {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--accent-blue);
+    border-radius: 4px;
+    padding: 1rem;
+    height: 400px;
+    overflow-y: auto;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.875rem;
+}
+
+.log-entry {
+    margin-bottom: 0.5rem;
+    padding: 0.25rem;
+    border-radius: 2px;
+}
+
+.log-entry.log-error {
+    background-color: rgba(255, 0, 0, 0.1);
+    border-left: 3px solid #ff0000;
+}
+
+.log-entry.log-warning {
+    background-color: rgba(255, 165, 0, 0.1);
+    border-left: 3px solid #ffa500;
+}
+
+.log-entry.log-info {
+    background-color: rgba(0, 212, 255, 0.1);
+    border-left: 3px solid var(--accent-blue);
+}
+
+.log-time {
+    color: var(--accent-green);
+    margin-right: 1rem;
+}
+
+.log-level {
+    color: var(--accent-purple);
+    margin-right: 1rem;
+}
+
+.log-message {
+    color: var(--text-primary);
+}
+
+/* Styles pour les éléments de formulaire */
+.cyber-select, .cyber-input {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--accent-blue);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.cyber-select:focus, .cyber-input:focus {
+    background-color: rgba(0, 0, 0, 0.7);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    color: var(--text-primary);
+}
+
+.cyber-select option {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+}
+
+/* Styles pour les indicateurs de statut */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+    animation: pulse 2s infinite;
+}
+
+.status-active, .status-sent {
+    background-color: var(--accent-green);
+    box-shadow: 0 0 10px var(--accent-green);
+}
+
+.status-inactive, .status-offline {
+    background-color: var(--accent-orange);
+    box-shadow: 0 0 10px var(--accent-orange);
+}
+
+.status-pending {
+    background-color: var(--accent-blue);
+    box-shadow: 0 0 10px var(--accent-blue);
+}
+
+.status-failed {
+    background-color: #ff0000;
+    box-shadow: 0 0 10px #ff0000;
+}
+
+/* Styles pour les actions de téléphone */
+.phone-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.phone-status {
+    display: flex;
+    align-items: center;
+}
+
+.sim-badge {
+    background-color: var(--accent-purple);
+    color: var(--text-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+}
+
+/* Styles pour la pagination */
+.pagination {
+    margin: 0;
+}
+
+.page-link {
+    background-color: transparent;
+    border: 1px solid var(--accent-blue);
+    color: var(--accent-blue);
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: var(--bg-dark);
+}
+
+.page-item.active .page-link {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: var(--bg-dark);
+}
+
+.page-item.disabled .page-link {
+    background-color: transparent;
+    border-color: rgba(0, 212, 255, 0.3);
+    color: rgba(0, 212, 255, 0.3);
+}
+
+/* Styles pour les groupes d'input */
+.input-group-text {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--accent-blue);
+    color: var(--text-secondary);
+}
+
+/* Responsive pour toutes les pages */
+@media (max-width: 768px) {
+    .cyber-tabs .nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .logs-container {
+        height: 300px;
+    }
+} 
+    --bg-dark: #0F0F23;
+    --card-bg: #1A1A2E;
+    --accent-blue: #00D4FF;
+    --accent-purple: #9D00FF;
+    --accent-green: #00FF88;
+    --accent-orange: #FF6600;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B8B8B8;
+}
+
+body.cyberpunk-theme {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    padding: 1rem;
+}
+
+.navbar-brand {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    color: var(--text-primary) !important;
+}
+
+.neon-text {
+    color: var(--accent-blue);
+    text-shadow: 0 0 5px var(--accent-blue),
+                 0 0 10px var(--accent-blue),
+                 0 0 20px var(--accent-blue);
+}
+
+.nav-link {
+    color: var(--text-secondary) !important;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--accent-blue) !important;
+    text-shadow: 0 0 5px var(--accent-blue);
+}
+
+/* Cards */
+.cyber-card {
+    background-color: var(--card-bg);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.cyber-card:hover {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Metrics */
+.metric {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    color: var(--accent-blue);
+    text-shadow: 0 0 10px var(--accent-blue);
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.metric + h3 {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+/* Tables */
+.table {
+    color: var(--text-primary);
+    border-color: rgba(0, 212, 255, 0.2);
+}
+
+.table-dark {
+    background-color: transparent;
+}
+
+.table-dark thead th {
+    border-bottom: 2px solid var(--accent-blue);
+    color: var(--accent-blue);
+}
+
+.table-dark tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table-dark tbody tr:hover {
+    background-color: rgba(0, 212, 255, 0.1);
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-online {
+    background-color: var(--accent-green);
+    box-shadow: 0 0 10px var(--accent-green);
+}
+
+.status-offline {
+    background-color: var(--accent-orange);
+    box-shadow: 0 0 10px var(--accent-orange);
+}
+
+/* Buttons */
+.btn-cyber {
+    background-color: transparent;
+    border: 1px solid var(--accent-blue);
+    color: var(--accent-blue);
+    font-family: 'Orbitron', sans-serif;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-cyber:hover {
+    background-color: var(--accent-blue);
+    color: var(--bg-dark);
+    box-shadow: 0 0 15px var(--accent-blue);
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Styles pour la page des SIMs */
+.cyber-progress {
+    background-color: var(--card-bg);
+    border: 1px solid var(--accent-blue);
+    height: 20px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.cyber-progress .progress-bar {
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+    border-right: 1px solid var(--accent-blue);
+    box-shadow: 0 0 10px var(--accent-blue);
+    transition: width 0.3s ease;
+}
+
+.form-check-input {
+    background-color: var(--card-bg);
+    border: 1px solid var(--accent-blue);
+}
+
+.form-check-input:checked {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 10px var(--accent-blue);
+}
+
+/* Styles pour les statistiques */
+.metric {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    color: var(--accent-blue);
+    text-shadow: 0 0 10px var(--accent-blue);
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.metric + h3 {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+/* Styles pour les modals */
+.cyber-modal .modal-content {
+    background-color: var(--card-bg);
+    border: 1px solid var(--accent-blue);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+}
+
+.cyber-modal .modal-header {
+    border-bottom: 1px solid var(--accent-blue);
+    padding: 1rem;
+}
+
+.cyber-modal .modal-footer {
+    border-top: 1px solid var(--accent-blue);
+    padding: 1rem;
+}
+
+.cyber-modal .form-label {
+    color: var(--text-secondary);
+    font-family: 'Space Mono', monospace;
+}
+
+/* Animations pour les boutons d'action */
+.btn-cyber.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-cyber.btn-sm i {
+    font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .metric {
+        font-size: 2rem;
+    }
+    
+    .cyber-card {
+        padding: 1rem;
+    }
+    
+    .table-responsive {
+        margin: 0 -1rem;
+    }
+    
+    .phone-actions {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .btn-cyber.btn-sm {
+        width: 100%;
+    }
+}
+
+/* Styles pour la page de configuration */
+.cyber-tabs {
+    border-bottom: 2px solid var(--accent-blue);
+    background-color: transparent;
+}
+
+.cyber-tabs .nav-link {
+    color: var(--text-secondary);
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0;
+    padding: 0.75rem 1.5rem;
+    font-family: 'Orbitron', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.cyber-tabs .nav-link:hover {
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    background-color: rgba(0, 212, 255, 0.1);
+}
+
+.cyber-tabs .nav-link.active {
+    color: var(--accent-blue);
+    background-color: var(--card-bg);
+    border-color: var(--accent-blue) var(--accent-blue) var(--card-bg);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.tab-content {
+    border-radius: 0 0 8px 8px;
+    border-top: none;
+}
+
+/* Styles pour les logs */
+.logs-container {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--accent-blue);
+    border-radius: 4px;
+    padding: 1rem;
+    height: 400px;
+    overflow-y: auto;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.875rem;
+}
+
+.log-entry {
+    margin-bottom: 0.5rem;
+    padding: 0.25rem;
+    border-radius: 2px;
+}
+
+.log-entry.log-error {
+    background-color: rgba(255, 0, 0, 0.1);
+    border-left: 3px solid #ff0000;
+}
+
+.log-entry.log-warning {
+    background-color: rgba(255, 165, 0, 0.1);
+    border-left: 3px solid #ffa500;
+}
+
+.log-entry.log-info {
+    background-color: rgba(0, 212, 255, 0.1);
+    border-left: 3px solid var(--accent-blue);
+}
+
+.log-time {
+    color: var(--accent-green);
+    margin-right: 1rem;
+}
+
+.log-level {
+    color: var(--accent-purple);
+    margin-right: 1rem;
+}
+
+.log-message {
+    color: var(--text-primary);
+}
+
+/* Styles pour les éléments de formulaire */
+.cyber-select, .cyber-input {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--accent-blue);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.cyber-select:focus, .cyber-input:focus {
+    background-color: rgba(0, 0, 0, 0.7);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    color: var(--text-primary);
+}
+
+.cyber-select option {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+}
+
+/* Styles pour les indicateurs de statut */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+    animation: pulse 2s infinite;
+}
+
+.status-active, .status-sent {
+    background-color: var(--accent-green);
+    box-shadow: 0 0 10px var(--accent-green);
+}
+
+.status-inactive, .status-offline {
+    background-color: var(--accent-orange);
+    box-shadow: 0 0 10px var(--accent-orange);
+}
+
+.status-pending {
+    background-color: var(--accent-blue);
+    box-shadow: 0 0 10px var(--accent-blue);
+}
+
+.status-failed {
+    background-color: #ff0000;
+    box-shadow: 0 0 10px #ff0000;
+}
+
+/* Styles pour les actions de téléphone */
+.phone-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.phone-status {
+    display: flex;
+    align-items: center;
+}
+
+.sim-badge {
+    background-color: var(--accent-purple);
+    color: var(--text-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+}
+
+/* Styles pour la pagination */
+.pagination {
+    margin: 0;
+}
+
+.page-link {
+    background-color: transparent;
+    border: 1px solid var(--accent-blue);
+    color: var(--accent-blue);
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: var(--bg-dark);
+}
+
+.page-item.active .page-link {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: var(--bg-dark);
+}
+
+.page-item.disabled .page-link {
+    background-color: transparent;
+    border-color: rgba(0, 212, 255, 0.3);
+    color: rgba(0, 212, 255, 0.3);
+}
+
+/* Styles pour les groupes d'input */
+.input-group-text {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--accent-blue);
+    color: var(--text-secondary);
+}
+
+/* Responsive pour toutes les pages */
+@media (max-width: 768px) {
+    .cyber-tabs .nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .logs-container {
+        height: 300px;
+    }
+} 
+ 
+ 

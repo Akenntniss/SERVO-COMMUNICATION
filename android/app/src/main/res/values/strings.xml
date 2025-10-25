@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SERVO COMMUNICATION</string>
+    
+    <!-- Configuration générale -->
+    <string name="setup_title">Configuration SERVO COMMUNICATION</string>
+    <string name="setup_step_1">Étape 1: Connexion au serveur</string>
+    <string name="setup_step_2">Étape 2: Permissions</string>
+    <string name="setup_step_3">Étape 3: Cartes SIM</string>
+    <string name="setup_step_4">Étape 4: Test et finalisation</string>
+    
+    <!-- Boutons -->
+    <string name="btn_previous">Précédent</string>
+    <string name="btn_next">Suivant</string>
+    <string name="btn_finish">Terminer</string>
+    <string name="btn_test_connection">Tester la connexion</string>
+    <string name="btn_refresh">Actualiser</string>
+    <string name="btn_retry">Réessayer</string>
+    
+    <!-- Configuration serveur -->
+    <string name="server_config_title">Configuration du serveur</string>
+    <string name="server_config_description">Entrez l\'URL du serveur SERVO COMMUNICATION et votre clé API</string>
+    <string name="server_url_hint">URL du serveur</string>
+    <string name="api_key_hint">Clé API</string>
+    <string name="server_url_required">L\'URL du serveur est requise</string>
+    <string name="api_key_required">La clé API est requise</string>
+    <string name="invalid_url">URL invalide</string>
+    <string name="server_info">Assurez-vous que le serveur est accessible depuis ce réseau</string>
+    
+    <!-- Permissions -->
+    <string name="permissions_title">Permissions requises</string>
+    <string name="permissions_description">L\'application nécessite certaines permissions pour fonctionner correctement</string>
+    <string name="permissions_summary">Permissions accordées: %1$d/%2$d</string>
+    <string name="permissions_all_granted">✓ Toutes les permissions requises sont accordées</string>
+    <string name="permissions_missing">⚠ Permissions manquantes: %1$d</string>
+    <string name="permissions_info">Cliquez sur \'Suivant\' pour demander les permissions manquantes</string>
+    <string name="permission_sms">Envoi de SMS</string>
+    <string name="permission_sms_desc">Nécessaire pour envoyer des SMS</string>
+    <string name="permission_phone_state">État du téléphone</string>
+    <string name="permission_phone_state_desc">Accès aux informations des cartes SIM</string>
+    <string name="permission_internet">Accès Internet</string>
+    <string name="permission_internet_desc">Communication avec le serveur</string>
+    <string name="permission_phone_numbers">Numéros de téléphone</string>
+    <string name="permission_phone_numbers_desc">Lecture des numéros des cartes SIM</string>
+    <string name="permission_notifications">Notifications</string>
+    <string name="permission_notifications_desc">Affichage des notifications</string>
+    <string name="permission_required">REQUIS</string>
+    <string name="permission_optional">OPTIONNEL</string>
+    
+    <!-- Cartes SIM -->
+    <string name="sim_cards_title">Cartes SIM détectées</string>
+    <string name="sim_cards_description">Configuration des cartes SIM pour l\'envoi de SMS</string>
+    <string name="sim_cards_count">%1$d carte(s) SIM détectée(s)</string>
+    <string name="sim_cards_ready">✓ Cartes SIM configurées et prêtes</string>
+    <string name="sim_cards_none">⚠ Aucune carte SIM détectée</string>
+    <string name="sim_cards_insert">⚠ Insérez une carte SIM pour continuer</string>
+    <string name="sim_cards_permissions">⚠ Accordez les permissions pour continuer</string>
+    <string name="sim_cards_error">⚠ Erreur de configuration</string>
+    <string name="sim_cards_info">Les cartes SIM détectées seront utilisées pour l\'envoi de SMS. Assurez-vous qu\'elles ont du crédit.</string>
+    <string name="sim_slot">Slot %1$d</string>
+    <string name="sim_active">Active</string>
+    <string name="sim_inactive">Inactive</string>
+    <string name="sim_number_label">Numéro:</string>
+    <string name="sim_slot_label">Emplacement:</string>
+    <string name="sim_country">Pays: %1$s</string>
+    <string name="sim_id">ID: %1$d</string>
+    <string name="sim_roaming">ROAMING</string>
+    <string name="sim_local">LOCAL</string>
+    <string name="sim_number_unavailable">Numéro non disponible</string>
+    <string name="sim_country_undefined">Pays: Non défini</string>
+    
+    <!-- Test de connexion -->
+    <string name="test_title">Test et finalisation</string>
+    <string name="test_description">Vérification finale de la configuration avant utilisation</string>
+    <string name="test_summary_title">Résumé de la configuration</string>
+    <string name="test_server_label">Serveur</string>
+    <string name="test_phone_id_label">ID Téléphone</string>
+    <string name="test_permissions_ok">✓ Permissions accordées</string>
+    <string name="test_sim_ok">✓ Cartes SIM détectées</string>
+    <string name="test_connection_title">Test de connexion</string>
+    <string name="test_connection_prompt">Cliquez sur le bouton pour tester la connexion</string>
+    <string name="test_connection_running">Test de connexion en cours...</string>
+    <string name="test_connection_success">✓ Test réussi ! L\'application est prête à fonctionner.</string>
+    <string name="test_connection_error">⚠ Erreur: %1$s</string>
+    <string name="test_connection_incomplete">⚠ Configuration incomplète</string>
+    <string name="test_success_button">Test réussi</string>
+    <string name="test_final_info">Une fois le test réussi, cliquez sur \'Terminer\' pour commencer à utiliser l\'application</string>
+    
+    <!-- Messages généraux -->
+    <string name="connection_success">Connexion réussie!</string>
+    <string name="connection_error">Erreur: %1$s</string>
+    <string name="permissions_needed">Toutes les permissions sont nécessaires</string>
+    <string name="not_configured">Non configuré</string>
+    <string name="not_generated">Non généré</string>
+    <string name="checking">Vérification en cours...</string>
+    <string name="detecting">Détection en cours...</string>
+    <string name="verifying_sim">Vérification des cartes SIM...</string>
+    
+    <!-- MainActivity -->
+    <string name="service_status">Statut du Service</string>
+    <string name="service_active">Service: Actif</string>
+    <string name="service_inactive">Service: Inactif</string>
+    <string name="start_service">Démarrer le service</string>
+    <string name="stop_service">Arrêter le service</string>
+    <string name="server_connection">Connexion au Serveur</string>
+    <string name="connected">Connecté</string>
+    <string name="disconnected">Déconnecté</string>
+    <string name="statistics">Statistiques</string>
+    <string name="messages_sent_today">Messages envoyés aujourd\'hui: %d</string>
+    <string name="active_sims">SIMs actives: %d</string>
+    <string name="detected_sims">Cartes SIM Détectées</string>
+    <string name="no_sim_detected">Aucune SIM détectée</string>
+    <string name="refresh">Actualiser</string>
+    <string name="configuration">Configuration</string>
+    
+    <!-- Messages -->
+    <string name="service_started">Service démarré</string>
+    <string name="service_stopped">Service arrêté</string>
+    <string name="connection_successful">Connexion réussie</string>
+    <string name="connection_failed">Échec de la connexion</string>
+    <string name="permissions_granted">Permissions accordées</string>
+    <string name="permissions_denied">Certaines permissions sont nécessaires</string>
+    <string name="configuration_saved">Configuration enregistrée</string>
+    <string name="error_empty_fields">Veuillez remplir tous les champs</string>
+    <string name="error_invalid_url">URL invalide</string>
+    
+    <!-- Notifications -->
+    <string name="notification_channel_name">Service SERVO COMMUNICATION</string>
+    <string name="notification_channel_description">Notifications du service SERVO COMMUNICATION</string>
+    <string name="notification_title">SERVO COMMUNICATION</string>
+    <string name="notification_text">Service en cours d\'exécution</string>
+    
+    <!-- Errors -->
+    <string name="error_loading_sims">Erreur lors du chargement des SIMs</string>
+    <string name="error_connection">Impossible de se connecter au serveur</string>
+    <string name="error_sending_sms">Erreur lors de l\'envoi du SMS</string>
+    <string name="error_no_sim">Aucune SIM disponible</string>
+</resources> 
+ 
+ 

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Télécharger SMS Gateway App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .download-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .app-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            margin: 0 auto 2rem;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+        }
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.4);
+            color: white;
+        }
+        .feature-item {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .version-badge {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        .new-badge {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+                <div class="download-card p-5 text-center">
+                    <div class="app-icon">
+                        <i class="fas fa-sms"></i>
+                    </div>
+                    
+                    <h1 class="mb-3">SMS Gateway App</h1>
+                    <div class="version-badge">Version 1.2 <span class="new-badge">NOUVEAU</span></div>
+                    
+                    <p class="lead text-muted mb-4">
+                        Application Android pour la gestion et l'envoi de SMS via votre serveur SMS Gateway
+                    </p>
+                    
+                    <a href="/download/smsgateway.apk" class="download-btn mb-5">
+                        <i class="fab fa-android"></i>
+                        Télécharger APK
+                        <small style="font-size: 0.8em; opacity: 0.8;">(9.4 MB)</small>
+                    </a>
+                    
+                    <div class="alert alert-success mb-4">
+                        <i class="fas fa-star me-2"></i>
+                        <strong>Nouveau dans v1.2:</strong> Correction du défilement sur les petits écrans !
+                    </div>
+                    
+                    <div class="row text-start">
+                        <div class="col-md-6">
+                            <div class="feature-item">
+                                <h5><i class="fas fa-mobile-alt text-primary me-2"></i>Gestion Multi-SIM</h5>
+                                <p class="mb-0 small text-muted">Gérez plusieurs cartes SIM et basculez automatiquement</p>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <h5><i class="fas fa-chart-bar text-success me-2"></i>Statistiques</h5>
+                                <p class="mb-0 small text-muted">Suivez vos envois et quotas en temps réel</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="feature-item">
+                                <h5><i class="fas fa-cog text-warning me-2"></i>Configuration</h5>
+                                <p class="mb-0 small text-muted">Configurez facilement votre serveur et limites</p>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <h5><i class="fas fa-shield-alt text-info me-2"></i>Sécurisé</h5>
+                                <p class="mb-0 small text-muted">Connexion sécurisée à votre serveur privé</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-start">
+                        <h5><i class="fas fa-info-circle text-primary me-2"></i>Informations</h5>
+                        <ul class="list-unstyled small text-muted">
+                            <li><strong>Version:</strong> 1.2 (Corrections de défilement)</li>
+                            <li><strong>Taille:</strong> 9.4 MB</li>
+                            <li><strong>Android requis:</strong> 6.0+ (API 23)</li>
+                            <li><strong>Permissions:</strong> SMS, Téléphone, Internet</li>
+                            <li><strong>Serveur:</strong> 168.231.85.4:3001</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="text-start mt-4">
+                        <h5><i class="fas fa-history text-success me-2"></i>Nouveautés v1.2</h5>
+                        <ul class="list-unstyled small text-muted">
+                            <li>✅ <strong>Défilement amélioré:</strong> Interface complète accessible sur tous les écrans</li>
+                            <li>✅ <strong>Petits écrans:</strong> Plus de contenu caché ou inaccessible</li>
+                            <li>✅ <strong>Interface optimisée:</strong> Navigation fluide dans tous les menus</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Installation:</strong> Activez "Sources inconnues" dans les paramètres Android pour installer cette APK.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

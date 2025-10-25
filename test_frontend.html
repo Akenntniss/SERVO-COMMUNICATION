@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Frontend API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Test Frontend API</h1>
+    
+    <div class="section">
+        <h2>Test API Téléphones</h2>
+        <button onclick="testPhones()">Tester /api/phones</button>
+        <div id="phones-result"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Test API SIMs</h2>
+        <button onclick="testSims()">Tester /api/sims</button>
+        <div id="sims-result"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Test API Messages</h2>
+        <button onclick="testMessages()">Tester /api/messages/history</button>
+        <div id="messages-result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://192.168.1.155:3001/api';
+
+        async function testPhones() {
+            const resultDiv = document.getElementById('phones-result');
+            try {
+                resultDiv.innerHTML = '<p>Chargement...</p>';
+                const response = await fetch(`${API_URL}/phones`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Succès! ${data.data.length} téléphone(s) trouvé(s)</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p class="error">❌ Erreur: ${data.message}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Erreur de connexion: ${error.message}</p>`;
+            }
+        }
+
+        async function testSims() {
+            const resultDiv = document.getElementById('sims-result');
+            try {
+                resultDiv.innerHTML = '<p>Chargement...</p>';
+                const response = await fetch(`${API_URL}/sims`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Succès! ${data.data.length} SIM(s) trouvée(s)</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p class="error">❌ Erreur: ${data.message}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Erreur de connexion: ${error.message}</p>`;
+            }
+        }
+
+        async function testMessages() {
+            const resultDiv = document.getElementById('messages-result');
+            try {
+                resultDiv.innerHTML = '<p>Chargement...</p>';
+                const response = await fetch(`${API_URL}/messages/history`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Succès! ${data.data.length} message(s) trouvé(s)</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p class="error">❌ Erreur: ${data.message}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Erreur de connexion: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html> 

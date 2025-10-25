@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Gateway - Documentation API</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        .code-block {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--accent-blue);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        .endpoint {
+            background: rgba(0, 255, 255, 0.1);
+            border-left: 4px solid var(--accent-blue);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .method-get { color: #28a745; }
+        .method-post { color: #007bff; }
+        .method-put { color: #ffc107; }
+        .method-delete { color: #dc3545; }
+        .toc {
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        .toc a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            display: block;
+            padding: 0.25rem 0;
+        }
+        .toc a:hover {
+            color: var(--neon-green);
+        }
+        .response-example {
+            background: rgba(0, 255, 0, 0.1);
+            border-left: 4px solid var(--neon-green);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .error-example {
+            background: rgba(255, 0, 0, 0.1);
+            border-left: 4px solid #dc3545;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body class="cyberpunk-theme">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <span class="neon-text">SMS</span>Gateway
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="phones.html">Téléphones</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sims.html">SIMs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="messages.html">Messages</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="autoswitch.html">Auto-Switch</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="settings.html">Configuration</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="docs.html">Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/download/" target="_blank">
+                            <i class="fas fa-download"></i> Télécharger APK
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Table des matières -->
+            <div class="col-lg-3">
+                <div class="cyber-card toc">
+                    <h5 class="neon-text mb-3">
+                        <i class="fas fa-list"></i> Table des matières
+                    </h5>
+                    <nav>
+                        <a href="#introduction">Introduction</a>
+                        <a href="#authentication">Authentification</a>
+                        <a href="#base-url">URL de base</a>
+                        <a href="#endpoints">Endpoints API</a>
+                        <a href="#send-sms">Envoyer SMS</a>
+                        <a href="#get-phones">Téléphones</a>
+                        <a href="#get-sims">SIMs</a>
+                        <a href="#get-messages">Messages</a>
+                        <a href="#autoswitch">Auto-Switch</a>
+                        <a href="#health">Health Check</a>
+                        <a href="#examples">Exemples d'intégration</a>
+                        <a href="#javascript">JavaScript</a>
+                        <a href="#php">PHP</a>
+                        <a href="#python">Python</a>
+                        <a href="#curl">cURL</a>
+                        <a href="#errors">Gestion d'erreurs</a>
+                        <a href="#rate-limits">Limites de taux</a>
+                        <a href="test-api.html" target="_blank">🧪 Test Interactif</a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Contenu principal -->
+            <div class="col-lg-9">
+                <div class="cyber-card">
+                    <h1 class="neon-text mb-4">
+                        <i class="fas fa-book"></i> Documentation API SMS Gateway
+                    </h1>
+
+                    <!-- Introduction -->
+                    <section id="introduction" class="mb-5">
+                        <h2 class="text-info">Introduction</h2>
+                        <p>L'API SMS Gateway vous permet d'envoyer des SMS depuis vos applications web et mobiles. Cette API RESTful utilise JSON pour les échanges de données et supporte le basculement automatique entre SIMs.</p>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Fonctionnalités principales :</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Envoi de SMS via API REST</li>
+                                <li>Basculement automatique entre SIMs</li>
+                                <li>Gestion des quotas SMS et destinataires</li>
+                                <li>Historique complet des messages</li>
+                                <li>Monitoring en temps réel</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <!-- Authentification -->
+                    <section id="authentication" class="mb-5">
+                        <h2 class="text-info">Authentification</h2>
+                        <p>Actuellement, l'API ne nécessite pas d'authentification. Pour un usage en production, il est recommandé d'ajouter une couche d'authentification (API Key, JWT, etc.).</p>
+                    </section>
+
+                    <!-- URL de base -->
+                    <section id="base-url" class="mb-5">
+                        <h2 class="text-info">URL de base</h2>
+                        <div class="code-block">
+                            <code>http://votre-serveur:3001/api</code>
+                        </div>
+                        <p><strong>Exemple :</strong> <code>http://168.231.85.4:3001/api</code></p>
+                    </section>
+
+                    <!-- Endpoints -->
+                    <section id="endpoints" class="mb-5">
+                        <h2 class="text-info">Endpoints API</h2>
+
+                        <!-- Envoyer SMS -->
+                        <div id="send-sms" class="endpoint">
+                            <h3><span class="method-post">POST</span> /messages/send</h3>
+                            <p>Envoie un SMS à un destinataire.</p>
+                            
+                            <h5>Paramètres :</h5>
+                            <div class="code-block">
+<pre><code>{
+  "recipient": "+33612345678",  // Numéro du destinataire (obligatoire)
+  "message": "Votre message"    // Contenu du SMS (obligatoire, max 160 caractères)
+}</code></pre>
+                            </div>
+
+                            <h5>Exemple de requête :</h5>
+                            <div class="code-block">
+<pre><code>curl -X POST http://168.231.85.4:3001/api/messages/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "recipient": "+33612345678",
+    "message": "Bonjour, ceci est un test SMS!"
+  }'</code></pre>
+                            </div>
+
+                            <h5>Réponse de succès :</h5>
+                            <div class="response-example">
+<pre><code>{
+  "success": true,
+  "message": "SMS ajouté à la queue avec succès",
+  "data": {
+    "id": 123,
+    "recipient": "+33612345678",
+    "message": "Bonjour, ceci est un test SMS!",
+    "sim_id": 33,
+    "status": "pending",
+    "created_at": "2024-01-15T10:30:00.000Z"
+  }
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Téléphones -->
+                        <div id="get-phones" class="endpoint">
+                            <h3><span class="method-get">GET</span> /phones</h3>
+                            <p>Récupère la liste des téléphones connectés.</p>
+                            
+                            <h5>Exemple de requête :</h5>
+                            <div class="code-block">
+<pre><code>curl http://168.231.85.4:3001/api/phones</code></pre>
+                            </div>
+
+                            <h5>Réponse :</h5>
+                            <div class="response-example">
+<pre><code>{
+  "success": true,
+  "data": [
+    {
+      "id": "1283e97f-b54b-4793-98bd-76c3bc1f7e00",
+      "device_name": "Samsung SM-A326B",
+      "last_seen": "2024-01-15T10:25:00.000Z",
+      "status": "online",
+      "sim_id": 33
+    }
+  ]
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- SIMs -->
+                        <div id="get-sims" class="endpoint">
+                            <h3><span class="method-get">GET</span> /sims</h3>
+                            <p>Récupère la liste des SIMs et leurs quotas.</p>
+                            
+                            <h5>Exemple de requête :</h5>
+                            <div class="code-block">
+<pre><code>curl http://168.231.85.4:3001/api/sims</code></pre>
+                            </div>
+
+                            <h5>Réponse :</h5>
+                            <div class="response-example">
+<pre><code>{
+  "success": true,
+  "data": [
+    {
+      "id": 33,
+      "carrier_name": "Free",
+      "phone_number": "+33745520054",
+      "monthly_limit": 30000,
+      "messages_sent_month": 95,
+      "recipients_monthly_limit": 50,
+      "recipients_monthly": 5,
+      "is_default": true,
+      "is_active": true
+    }
+  ]
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Messages -->
+                        <div id="get-messages" class="endpoint">
+                            <h3><span class="method-get">GET</span> /messages/history</h3>
+                            <p>Récupère l'historique des messages.</p>
+                            
+                            <h5>Paramètres optionnels :</h5>
+                            <ul>
+                                <li><code>limit</code> : Nombre de messages à récupérer (défaut: 50)</li>
+                                <li><code>offset</code> : Décalage pour la pagination (défaut: 0)</li>
+                            </ul>
+
+                            <h5>Exemple de requête :</h5>
+                            <div class="code-block">
+<pre><code>curl "http://168.231.85.4:3001/api/messages/history?limit=10&offset=0"</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Auto-Switch -->
+                        <div id="autoswitch" class="endpoint">
+                            <h3><span class="method-get">GET</span> /autoswitch/status</h3>
+                            <p>Récupère le statut du système de basculement automatique.</p>
+                            
+                            <h5>Exemple de requête :</h5>
+                            <div class="code-block">
+<pre><code>curl http://168.231.85.4:3001/api/autoswitch/status</code></pre>
+                            </div>
+
+                            <h5>Réponse :</h5>
+                            <div class="response-example">
+<pre><code>{
+  "success": true,
+  "data": {
+    "service_running": true,
+    "default_sim": {
+      "id": 33,
+      "carrier_name": "Free",
+      "sms_usage_percentage": 0.32,
+      "recipients_usage_percentage": 10.00,
+      "max_usage_percentage": 10.00
+    },
+    "all_sims": [...]
+  }
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Health Check -->
+                        <div id="health" class="endpoint">
+                            <h3><span class="method-get">GET</span> /health</h3>
+                            <p>Vérifie l'état de santé de l'API.</p>
+                            
+                            <h5>Exemple de requête :</h5>
+                            <div class="code-block">
+<pre><code>curl http://168.231.85.4:3001/api/health</code></pre>
+                            </div>
+
+                            <h5>Réponse :</h5>
+                            <div class="response-example">
+<pre><code>{
+  "status": "OK",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "database": "connected",
+  "uptime": 3600
+}</code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Exemples d'intégration -->
+                    <section id="examples" class="mb-5">
+                        <h2 class="text-info">Exemples d'intégration</h2>
+
+                        <!-- JavaScript -->
+                        <div id="javascript" class="mb-4">
+                            <h3 class="text-warning">JavaScript / Fetch API</h3>
+                            <div class="code-block">
+<pre><code>// Fonction pour envoyer un SMS
+async function sendSMS(recipient, message) {
+  try {
+    const response = await fetch('http://168.231.85.4:3001/api/messages/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        recipient: recipient,
+        message: message
+      })
+    });
+
+    const result = await response.json();
+    
+    if (result.success) {
+      console.log('SMS envoyé avec succès:', result.data);
+      return result.data;
+    } else {
+      console.error('Erreur:', result.message);
+      throw new Error(result.message);
+    }
+  } catch (error) {
+    console.error('Erreur réseau:', error);
+    throw error;
+  }
+}
+
+// Utilisation
+sendSMS('+33612345678', 'Bonjour depuis JavaScript!')
+  .then(data => console.log('Succès:', data))
+  .catch(error => console.error('Erreur:', error));</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- PHP -->
+                        <div id="php" class="mb-4">
+                            <h3 class="text-warning">PHP</h3>
+                            <div class="code-block">
+<pre><code>&lt;?php
+function sendSMS($recipient, $message) {
+    $url = 'http://168.231.85.4:3001/api/messages/send';
+    
+    $data = array(
+        'recipient' => $recipient,
+        'message' => $message
+    );
+    
+    $options = array(
+        'http' => array(
+            'header'  => "Content-type: application/json\r\n",
+            'method'  => 'POST',
+            'content' => json_encode($data)
+        )
+    );
+    
+    $context = stream_context_create($options);
+    $result = file_get_contents($url, false, $context);
+    
+    if ($result === FALSE) {
+        throw new Exception('Erreur lors de l\'envoi du SMS');
+    }
+    
+    return json_decode($result, true);
+}
+
+// Utilisation
+try {
+    $response = sendSMS('+33612345678', 'Bonjour depuis PHP!');
+    if ($response['success']) {
+        echo "SMS envoyé avec succès: " . $response['data']['id'];
+    } else {
+        echo "Erreur: " . $response['message'];
+    }
+} catch (Exception $e) {
+    echo "Erreur: " . $e->getMessage();
+}
+?&gt;</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Python -->
+                        <div id="python" class="mb-4">
+                            <h3 class="text-warning">Python</h3>
+                            <div class="code-block">
+<pre><code>import requests
+import json
+
+def send_sms(recipient, message):
+    url = 'http://168.231.85.4:3001/api/messages/send'
+    
+    data = {
+        'recipient': recipient,
+        'message': message
+    }
+    
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    
+    try:
+        response = requests.post(url, json=data, headers=headers)
+        response.raise_for_status()  # Lève une exception pour les codes d'erreur HTTP
+        
+        result = response.json()
+        
+        if result['success']:
+            print(f"SMS envoyé avec succès: {result['data']['id']}")
+            return result['data']
+        else:
+            print(f"Erreur: {result['message']}")
+            return None
+            
+    except requests.exceptions.RequestException as e:
+        print(f"Erreur réseau: {e}")
+        return None
+
+# Utilisation
+result = send_sms('+33612345678', 'Bonjour depuis Python!')
+if result:
+    print(f"Message ID: {result['id']}")
+    print(f"Statut: {result['status']}")</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- cURL -->
+                        <div id="curl" class="mb-4">
+                            <h3 class="text-warning">cURL (Ligne de commande)</h3>
+                            <div class="code-block">
+<pre><code># Envoyer un SMS
+curl -X POST http://168.231.85.4:3001/api/messages/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "recipient": "+33612345678",
+    "message": "Bonjour depuis cURL!"
+  }'
+
+# Vérifier le statut des SIMs
+curl http://168.231.85.4:3001/api/sims
+
+# Récupérer l'historique des messages
+curl "http://168.231.85.4:3001/api/messages/history?limit=5"
+
+# Vérifier la santé de l'API
+curl http://168.231.85.4:3001/api/health</code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Gestion d'erreurs -->
+                    <section id="errors" class="mb-5">
+                        <h2 class="text-info">Gestion d'erreurs</h2>
+                        <p>L'API utilise les codes de statut HTTP standards et retourne des messages d'erreur en JSON.</p>
+
+                        <h5>Codes de statut :</h5>
+                        <ul>
+                            <li><code>200</code> - Succès</li>
+                            <li><code>400</code> - Requête invalide</li>
+                            <li><code>404</code> - Ressource non trouvée</li>
+                            <li><code>500</code> - Erreur serveur</li>
+                        </ul>
+
+                        <h5>Format des erreurs :</h5>
+                        <div class="error-example">
+<pre><code>{
+  "success": false,
+  "message": "Description de l'erreur",
+  "error": "Code d'erreur technique (optionnel)"
+}</code></pre>
+                        </div>
+
+                        <h5>Exemples d'erreurs courantes :</h5>
+                        <div class="error-example">
+<pre><code>// Numéro de téléphone invalide
+{
+  "success": false,
+  "message": "Le numéro de téléphone doit commencer par +"
+}
+
+// Message trop long
+{
+  "success": false,
+  "message": "Le message ne peut pas dépasser 160 caractères"
+}
+
+// Aucun téléphone connecté
+{
+  "success": false,
+  "message": "Aucun téléphone connecté disponible"
+}</code></pre>
+                        </div>
+                    </section>
+
+                    <!-- Limites de taux -->
+                    <section id="rate-limits" class="mb-5">
+                        <h2 class="text-info">Limites et quotas</h2>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Quotas automatiques :</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Le système gère automatiquement les quotas SMS par SIM</li>
+                                <li>Basculement automatique entre SIMs quand les quotas sont atteints</li>
+                                <li>Comptage des destinataires uniques par mois</li>
+                                <li>Notifications automatiques en cas de quota critique</li>
+                            </ul>
+                        </div>
+
+                        <h5>Recommandations :</h5>
+                        <ul>
+                            <li>Vérifiez le statut des SIMs avec <code>/api/autoswitch/status</code></li>
+                            <li>Implémentez une gestion d'erreur robuste</li>
+                            <li>Utilisez des timeouts appropriés (recommandé: 30 secondes)</li>
+                            <li>Surveillez les logs pour détecter les problèmes</li>
+                            <li><strong><a href="test-api.html" target="_blank">🧪 Testez l'API en temps réel</a></strong></li>
+                        </ul>
+                    </section>
+
+                    <!-- Footer -->
+                    <div class="text-center mt-5 pt-4 border-top">
+                        <p class="text-secondary">
+                            <i class="fas fa-code"></i> SMS Gateway API Documentation
+                            <br>
+                            <small>Système de basculement automatique intelligent</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html> 

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Gateway - Gestion des Messages</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="cyberpunk-theme">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <span class="neon-text">SMS</span>Gateway
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="phones.html">Téléphones</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sims.html">SIMs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="messages.html">Messages</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="settings.html">Configuration</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- En-tête avec actions -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h2 class="neon-text">Gestion des Messages</h2>
+            </div>
+            <div class="col-md-6 text-end">
+                <button class="btn btn-cyber me-2" data-bs-toggle="modal" data-bs-target="#sendMessageModal">
+                    <i class="fas fa-paper-plane"></i> Envoyer un SMS
+                </button>
+                <button class="btn btn-cyber" data-bs-toggle="modal" data-bs-target="#sendBulkModal">
+                    <i class="fas fa-broadcast-tower"></i> Envoi en masse
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="cyber-card">
+                    <h3 class="neon-text">Messages Aujourd'hui</h3>
+                    <div class="metric" id="todayMessagesCount">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="cyber-card">
+                    <h3 class="neon-text">Taux de Succès</h3>
+                    <div class="metric" id="successRate">0%</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="cyber-card">
+                    <h3 class="neon-text">En Attente</h3>
+                    <div class="metric" id="pendingCount">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="cyber-card">
+                    <h3 class="neon-text">Échecs</h3>
+                    <div class="metric" id="failedCount">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="cyber-card">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <select class="form-select cyber-select" id="statusFilter">
+                                <option value="">Tous les statuts</option>
+                                <option value="sent">Envoyé</option>
+                                <option value="pending">En attente</option>
+                                <option value="failed">Échec</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select cyber-select" id="simFilter">
+                                <option value="">Toutes les SIMs</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control cyber-input" id="searchInput" placeholder="Rechercher...">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="date" class="form-control cyber-input" id="dateFilter">
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-cyber w-100" id="refreshBtn">
+                                <i class="fas fa-sync"></i> Actualiser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des messages -->
+        <div class="row">
+            <div class="col-12">
+                <div class="cyber-card">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Destinataire</th>
+                                    <th>Message</th>
+                                    <th>SIM</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="messagesList">
+                                <!-- Rempli dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <span class="text-secondary">Affichage de <span id="startIndex">1</span> à <span id="endIndex">10</span> sur <span id="totalCount">0</span> messages</span>
+                        </div>
+                        <nav>
+                            <ul class="pagination" id="pagination">
+                                <!-- Rempli dynamiquement -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Envoi SMS -->
+    <div class="modal fade" id="sendMessageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content cyber-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title neon-text">Envoyer un SMS</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="sendMessageForm">
+                        <div class="mb-3">
+                            <label class="form-label">Destinataire</label>
+                            <input type="text" class="form-control cyber-input" name="recipient" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea class="form-control cyber-input" name="message" rows="4" required></textarea>
+                            <small class="text-secondary" id="charCount">0/160 caractères</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">SIM (optionnel)</label>
+                            <select class="form-select cyber-select" name="sim_id">
+                                <option value="">SIM par défaut</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cyber" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-cyber" id="sendMessageBtn">Envoyer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Envoi en masse -->
+    <div class="modal fade" id="sendBulkModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content cyber-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title neon-text">Envoi en masse</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="sendBulkForm">
+                        <div class="mb-3">
+                            <label class="form-label">Destinataires (un par ligne)</label>
+                            <textarea class="form-control cyber-input" name="recipients" rows="6" placeholder="+33123456789&#10;+33987654321&#10;..." required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea class="form-control cyber-input" name="message" rows="4" required></textarea>
+                            <small class="text-secondary" id="bulkCharCount">0/160 caractères</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">SIM (optionnel)</label>
+                            <select class="form-select cyber-select" name="sim_id">
+                                <option value="">SIM par défaut</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cyber" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-cyber" id="sendBulkBtn">Envoyer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/messages.js"></script>
+</body>
+</html> 
+ 
+ 

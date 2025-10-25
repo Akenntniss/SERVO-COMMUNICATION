@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Gateway - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0F0F23 0%, #1A1A2E 100%);
+            color: #E0E0E0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            color: #00D4FF;
+            text-shadow: 0 0 20px #00D4FF;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00D4FF; }
+            to { text-shadow: 0 0 30px #00D4FF, 0 0 40px #00D4FF; }
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .status-item {
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid #00D4FF;
+            border-radius: 10px;
+            padding: 15px;
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .status-item h3 {
+            color: #00FF88;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FFFFFF;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(26, 26, 46, 0.9);
+            border: 1px solid #9D00FF;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 0 20px rgba(157, 0, 255, 0.2);
+        }
+
+        .card h2 {
+            color: #9D00FF;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00FF88;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: rgba(15, 15, 35, 0.8);
+            border: 1px solid #00D4FF;
+            border-radius: 5px;
+            color: #FFFFFF;
+            font-family: 'Courier New', monospace;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #00FF88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00D4FF, #9D00FF);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .phones-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .phone-item {
+            background: rgba(15, 15, 35, 0.6);
+            border: 1px solid #00FF88;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .phone-item h4 {
+            color: #00D4FF;
+            margin-bottom: 5px;
+        }
+
+        .phone-item p {
+            color: #E0E0E0;
+            font-size: 0.9rem;
+            margin: 2px 0;
+        }
+
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .history-item {
+            background: rgba(15, 15, 35, 0.6);
+            border-left: 3px solid #00FF88;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .history-item.failed {
+            border-left-color: #FF4444;
+        }
+
+        .history-item .time {
+            color: #00D4FF;
+            font-size: 0.8rem;
+        }
+
+        .history-item .message {
+            color: #FFFFFF;
+            margin: 5px 0;
+        }
+
+        .history-item .status {
+            color: #00FF88;
+            font-size: 0.8rem;
+        }
+
+        .history-item.failed .status {
+            color: #FF4444;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .loading {
+            text-align: center;
+            color: #00D4FF;
+            font-style: italic;
+        }
+
+        .error {
+            color: #FF4444;
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid #FF4444;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .success {
+            color: #00FF88;
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00FF88;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SMS GATEWAY</h1>
+            <p>Dashboard de contrôle cyberpunk</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <h3>Téléphones Actifs</h3>
+                <div class="status-value" id="activePhones">0</div>
+            </div>
+            <div class="status-item">
+                <h3>Messages Aujourd'hui</h3>
+                <div class="status-value" id="todayMessages">0</div>
+            </div>
+            <div class="status-item">
+                <h3>Taux de Succès</h3>
+                <div class="status-value" id="successRate">100%</div>
+            </div>
+            <div class="status-item">
+                <h3>Statut Serveur</h3>
+                <div class="status-value" id="serverStatus">🟢 En ligne</div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>📱 Téléphones Connectés</h2>
+                <div id="phonesList" class="phones-list">
+                    <div class="loading">Chargement des téléphones...</div>
+                </div>
+                <button class="btn" onclick="refreshPhones()">🔄 Actualiser</button>
+            </div>
+
+            <div class="card">
+                <h2>📤 Envoyer SMS</h2>
+                <form id="smsForm">
+                    <div class="form-group">
+                        <label for="phoneSelect">Téléphone:</label>
+                        <select id="phoneSelect" required>
+                            <option value="">Sélectionner un téléphone</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="recipient">Destinataire:</label>
+                        <input type="tel" id="recipient" placeholder="+33612345678" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message:</label>
+                        <textarea id="message" rows="4" placeholder="Votre message..." required maxlength="160"></textarea>
+                        <small style="color: #00D4FF;">Caractères: <span id="charCount">0</span>/160</small>
+                    </div>
+                    <button type="submit" class="btn">🚀 Envoyer SMS</button>
+                </form>
+                <div id="sendResult"></div>
+            </div>
+
+            <div class="card full-width">
+                <h2>📊 Historique des Messages</h2>
+                <div id="historyList" class="history-list">
+                    <div class="loading">Chargement de l'historique...</div>
+                </div>
+                <button class="btn" onclick="refreshHistory()">🔄 Actualiser l'historique</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://192.168.1.155:3001/api';
+        
+        // Variables globales
+        let phones = [];
+        let messages = [];
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setupEventListeners();
+            
+            // Actualisation automatique toutes les 30 secondes
+            setInterval(loadData, 30000);
+        });
+
+        function setupEventListeners() {
+            // Formulaire SMS
+            document.getElementById('smsForm').addEventListener('submit', sendSMS);
+            
+            // Compteur de caractères
+            document.getElementById('message').addEventListener('input', updateCharCount);
+        }
+
+        function updateCharCount() {
+            const message = document.getElementById('message').value;
+            document.getElementById('charCount').textContent = message.length;
+        }
+
+        async function loadData() {
+            await Promise.all([
+                loadPhones(),
+                loadMessages(),
+                checkServerStatus()
+            ]);
+            updateStats();
+        }
+
+        async function loadPhones() {
+            try {
+                const response = await fetch(`${API_BASE}/phones`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    phones = data.data;
+                    displayPhones();
+                    updatePhoneSelect();
+                } else {
+                    throw new Error(data.message || 'Erreur lors du chargement des téléphones');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('phonesList').innerHTML = 
+                    `<div class="error">Erreur: ${error.message}</div>`;
+            }
+        }
+
+        async function loadMessages() {
+            try {
+                const response = await fetch(`${API_BASE}/messages/history`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    messages = Array.isArray(data.data) ? data.data : [];
+                    displayHistory();
+                } else {
+                    throw new Error(data.message || 'Erreur lors du chargement des messages');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('historyList').innerHTML = 
+                    `<div class="error">Erreur: ${error.message}</div>`;
+            }
+        }
+
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('serverStatus').innerHTML = '🟢 En ligne';
+                } else {
+                    document.getElementById('serverStatus').innerHTML = '🟡 Dégradé';
+                }
+            } catch (error) {
+                document.getElementById('serverStatus').innerHTML = '🔴 Hors ligne';
+            }
+        }
+
+        function displayPhones() {
+            const container = document.getElementById('phonesList');
+            
+            if (phones.length === 0) {
+                container.innerHTML = '<div class="loading">Aucun téléphone connecté</div>';
+                return;
+            }
+
+            container.innerHTML = phones.map(phone => `
+                <div class="phone-item">
+                    <h4>📱 ${phone.name || phone.phone_id}</h4>
+                    <p><strong>ID:</strong> ${phone.phone_id}</p>
+                    <p><strong>SIMs:</strong> ${phone.sim_count || 0}</p>
+                    <p><strong>Dernière activité:</strong> ${formatDate(phone.last_seen)}</p>
+                    <p><strong>Statut:</strong> ${phone.is_active ? '🟢 Actif' : '🔴 Inactif'}</p>
+                </div>
+            `).join('');
+        }
+
+        function updatePhoneSelect() {
+            const select = document.getElementById('phoneSelect');
+            select.innerHTML = '<option value="">Sélectionner un téléphone</option>';
+            
+            phones.filter(phone => phone.is_active).forEach(phone => {
+                const option = document.createElement('option');
+                option.value = phone.phone_id;
+                option.textContent = `${phone.name || phone.phone_id} (${phone.sim_count || 0} SIM)`;
+                select.appendChild(option);
+            });
+        }
+
+        function displayHistory() {
+            const container = document.getElementById('historyList');
+            
+            if (messages.length === 0) {
+                container.innerHTML = '<div class="loading">Aucun message dans l\'historique</div>';
+                return;
+            }
+
+            container.innerHTML = messages.slice(0, 50).map(msg => `
+                <div class="history-item ${msg.status === 'failed' ? 'failed' : ''}">
+                    <div class="time">${formatDate(msg.created_at)}</div>
+                    <div class="message"><strong>À:</strong> ${msg.recipient} | <strong>Message:</strong> ${msg.message}</div>
+                    <div class="status">📱 ${msg.phone_id} | 📊 ${msg.status}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            // Téléphones actifs
+            const activePhones = phones.filter(phone => phone.is_active).length;
+            document.getElementById('activePhones').textContent = activePhones;
+
+            // Messages aujourd'hui
+            const today = new Date().toDateString();
+            const todayMessages = messages.filter(msg => 
+                new Date(msg.created_at).toDateString() === today
+            ).length;
+            document.getElementById('todayMessages').textContent = todayMessages;
+
+            // Taux de succès
+            const successfulMessages = messages.filter(msg => msg.status === 'sent').length;
+            const successRate = messages.length > 0 ? 
+                Math.round((successfulMessages / messages.length) * 100) : 100;
+            document.getElementById('successRate').textContent = `${successRate}%`;
+        }
+
+        async function sendSMS(event) {
+            event.preventDefault();
+            
+            const phoneId = document.getElementById('phoneSelect').value;
+            const recipient = document.getElementById('recipient').value;
+            const message = document.getElementById('message').value;
+            const resultDiv = document.getElementById('sendResult');
+
+            if (!phoneId || !recipient || !message) {
+                resultDiv.innerHTML = '<div class="error">Veuillez remplir tous les champs</div>';
+                return;
+            }
+
+            try {
+                resultDiv.innerHTML = '<div class="loading">Envoi en cours...</div>';
+
+                const response = await fetch(`${API_BASE}/messages/send`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone_id: phoneId,
+                        recipient: recipient,
+                        message: message
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.innerHTML = '<div class="success">✅ Message envoyé avec succès!</div>';
+                    document.getElementById('smsForm').reset();
+                    document.getElementById('charCount').textContent = '0';
+                    
+                    // Actualiser l'historique après 2 secondes
+                    setTimeout(() => {
+                        loadMessages();
+                        resultDiv.innerHTML = '';
+                    }, 2000);
+                } else {
+                    throw new Error(data.message || 'Erreur lors de l\'envoi');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Erreur: ${error.message}</div>`;
+            }
+        }
+
+        function refreshPhones() {
+            document.getElementById('phonesList').innerHTML = '<div class="loading">Actualisation...</div>';
+            loadPhones();
+        }
+
+        function refreshHistory() {
+            document.getElementById('historyList').innerHTML = '<div class="loading">Actualisation...</div>';
+            loadMessages();
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Jamais';
+            
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'À l\'instant';
+            if (diffMins < 60) return `Il y a ${diffMins} min`;
+            if (diffHours < 24) return `Il y a ${diffHours}h`;
+            if (diffDays < 7) return `Il y a ${diffDays} jour(s)`;
+            
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+    </script>
+</body>
+</html> 
+ 
+ 
+ 

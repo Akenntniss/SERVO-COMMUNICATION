@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardBackgroundColor="@color/surface_dark"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header avec titre et switch -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/tvSimTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="📱 SIM 1"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/accent_blue" />
+
+            <TextView
+                android:id="@+id/tvSimStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🟢 Disponible"
+                android:textSize="14sp"
+                android:layout_marginEnd="8dp" />
+
+            <Switch
+                android:id="@+id/switchActive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:thumbTint="@color/accent_green"
+                android:trackTint="@color/text_secondary" />
+
+        </LinearLayout>
+
+        <!-- Informations SIM -->
+        <TextView
+            android:id="@+id/tvSimInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📞 +33123456789\n📡 Orange\n🆔 ID: 12345"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Configuration des limites -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⚙️ Configuration des limites"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/accent_purple"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Limite quotidienne -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="📅 Limite quotidienne:"
+                android:textSize="14sp"
+                android:textColor="@color/text_primary" />
+
+            <EditText
+                android:id="@+id/etDailyLimit"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="1000"
+                android:inputType="number"
+                android:textSize="14sp"
+                android:textColor="@color/text_primary"
+                android:backgroundTint="@color/accent_blue"
+                android:textAlignment="center" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" SMS"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginStart="4dp" />
+
+        </LinearLayout>
+
+        <!-- Usage quotidien -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/tvDailyUsage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="0/1000 (0%)"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary" />
+
+            <ProgressBar
+                android:id="@+id/progressDaily"
+                android:layout_width="100dp"
+                android:layout_height="8dp"
+                android:max="100"
+                android:progress="0"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:progressTint="@color/accent_green" />
+
+        </LinearLayout>
+
+        <!-- Limite mensuelle -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="📆 Limite mensuelle:"
+                android:textSize="14sp"
+                android:textColor="@color/text_primary" />
+
+            <EditText
+                android:id="@+id/etMonthlyLimit"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="30000"
+                android:inputType="number"
+                android:textSize="14sp"
+                android:textColor="@color/text_primary"
+                android:backgroundTint="@color/accent_blue"
+                android:textAlignment="center" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" SMS"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginStart="4dp" />
+
+        </LinearLayout>
+
+        <!-- Usage mensuel -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvMonthlyUsage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="0/30000 (0%)"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary" />
+
+            <ProgressBar
+                android:id="@+id/progressMonthly"
+                android:layout_width="100dp"
+                android:layout_height="8dp"
+                android:max="100"
+                android:progress="0"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:progressTint="@color/accent_green" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView> 
+ 
+ 

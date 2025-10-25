@@ -1,0 +1,418 @@
+# 🚀 PROMPT COMPLET - CRÉATION APPLICATION SMS GATEWAY
+
+Créez une application SMS Gateway complète permettant d'envoyer des SMS via des téléphones Android connectés. L'application doit comprendre 3 composants principaux : Backend API, Frontend Web, et Application Android.
+
+## 🎯 ARCHITECTURE GÉNÉRALE
+
+### Technologies Backend :
+- Node.js avec Express.js
+- MySQL pour la base de données
+- Cors, mysql2, bcrypt, PM2
+- Port par défaut : 3001
+
+### Technologies Frontend :
+- HTML5, CSS3, JavaScript vanilla ou React
+- Bootstrap 5 ou Tailwind CSS
+- Design cyberpunk/futuriste avec palette sombre
+- Couleurs : Fond #0F0F23, cartes #1A1A2E, accents néon #00D4FF, #9D00FF, #00FF88
+- Effets lumineux, animations, typographie 'Orbitron'
+
+### Technologies Android :
+- Android Studio avec Kotlin
+- Minimum SDK : Android 6.0 (API 23)
+- Permissions : SMS, PHONE, INTERNET, WAKE_LOCK
+- Service d'arrière-plan persistant
+
+## 📊 STRUCTURE BASE DE DONNÉES
+
+```sql
+-- Base de données : sms_gateway
+CREATE DATABASE IF NOT EXISTS sms_gateway;
+
+-- Table des téléphones Android
+CREATE TABLE phones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tel_id VARCHAR(100) NOT NULL UNIQUE,
+    model VARCHAR(100) NOT NULL,
+    status ENUM('online', 'offline') DEFAULT 'offline',
+    last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    service_status VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Table des cartes SIM
+CREATE TABLE sims (
+    sim_id INT AUTO_INCREMENT PRIMARY KEY,
+    device_id VARCHAR(100) NOT NULL,
+    slot_index INT NOT NULL,
+    phone_number VARCHAR(20) NOT NULL,
+    operator VARCHAR(50),
+    status ENUM('active', 'inactive') DEFAULT 'active',
+    messages_sent INT DEFAULT 0,
+    daily_limit INT DEFAULT 100,
+    recipient_limit INT DEFAULT 50,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (device_id) REFERENCES phones(tel_id) ON DELETE CASCADE
+);
+
+-- Table historique SMS
+CREATE TABLE sms_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    recipient VARCHAR(20) NOT NULL,
+    message TEXT NOT NULL,
+    sim_id INT,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('sent', 'failed', 'pending') DEFAULT 'pending',
+    failure_reason TEXT,
+    FOREIGN KEY (sim_id) REFERENCES sims(sim_id) ON DELETE SET NULL
+);
+
+-- Table configuration système
+CREATE TABLE system_config (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    config_key VARCHAR(50) NOT NULL UNIQUE,
+    config_value TEXT,
+    description TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Configuration par défaut
+INSERT INTO system_config (config_key, config_value, description) VALUES
+('default_sim_id', NULL, 'ID de la SIM par défaut pour envoi'),
+('auto_switch_enabled', 'true', 'Basculement automatique entre SIMs'),
+('api_rate_limit', '100', 'Limite requêtes API par minute'),
+('notifications_enabled', 'true', 'Notifications système activées');
+
+-- Table utilisateurs
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    api_key VARCHAR(100) UNIQUE,
+    role ENUM('admin', 'user') DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Utilisateur admin par défaut (mot de passe: admin123)
+INSERT INTO users (username, password, email, api_key, role) VALUES
+('admin', '$2b$10$GQT0onaZqx5W7gVaDLCkbe2EP/yGHUUDmUSlDkO2kf3/QZ/KLKCFi', 'admin@smsgateway.com', 'SG_API_9f8d2c1b3a4e5f6d7c8b9a1c2d3e4f5g6h7i8j9k0l', 'admin');
+```
+
+## 🔧 BACKEND API - ROUTES ESSENTIELLES
+
+### Routes de base :
+- `GET /api/health` - Vérification état API + connexion BDD
+- `GET /api/system/config` - Configuration système complète
+- `PUT /api/system/config` - Mise à jour configuration
+- `GET /api/system/failover/status` - Statut basculement automatique
+
+### Routes téléphones :
+- `GET /api/phones` - Liste téléphones avec SIMs associées
+- `GET /api/phones/:id` - Détails téléphone spécifique
+- `POST /api/phones/register` - Enregistrement nouveau téléphone
+- `PUT /api/phones/:id/heartbeat` - Mise à jour statut (heartbeat)
+- `DELETE /api/phones/:id` - Suppression téléphone
+
+### Routes SIMs :
+- `GET /api/sims` - Liste toutes SIMs disponibles
+- `GET /api/sims/:id` - Détails SIM spécifique
+- `PUT /api/sims/:id/config` - Configuration SIM (limites, statut)
+- `GET /api/sims/stats` - Statistiques utilisation SIMs
+
+### Routes messagerie :
+- `POST /api/messages/send` - Envoi SMS simple
+- `POST /api/messages/send-bulk` - Envoi en masse (CSV/JSON)
+- `GET /api/messages/history` - Historique complet avec filtres
+- `GET /api/messages/stats` - Statistiques envois (quotidien/mensuel)
+- `GET /api/messages/pending` - Messages en attente (pour app Android)
+- `PUT /api/messages/:id/status` - Mise à jour statut message
+- `DELETE /api/messages/:id` - Suppression message
+
+### Fonctionnalités backend obligatoires :
+1. **Gestion multi-SIM** : Support plusieurs cartes par téléphone
+2. **Basculement automatique** : Changement SIM si problème/quota atteint/hors ligne
+3. **Système heartbeat** : Surveillance état téléphones (toutes les 30s)
+4. **Gestion quotas** : Limites quotidiennes par SIM + destinataires uniques
+5. **Authentification** : JWT tokens + API keys
+6. **Rate limiting** : Protection contre spam
+7. **Logging complet** : Tous événements en base
+8. **Validation** : Sanitisation entrées + formats numéros
+9. **CORS** : Support requêtes cross-origin
+10. **Error handling** : Gestion erreurs robuste
+
+## 🎨 FRONTEND WEB - INTERFACE ADMINISTRATION
+
+### Design cyberpunk obligatoire :
+- **Palette sombre** : #0F0F23 (fond), #1A1A2E (cartes), #16213E (éléments)
+- **Accents néon** : #00D4FF (bleu), #9D00FF (violet), #00FF88 (vert), #FF6600 (orange)
+- **Effets lumineux** : box-shadow et text-shadow néon sur éléments interactifs
+- **Typographie** : 'Orbitron' (titres), 'Space Mono' (texte), espacement large
+- **Animations** : Pulsations néon, hover effects, transitions 300ms
+- **Bordures** : Fines avec transparence 30-60%, intensification au hover
+
+### Pages obligatoires :
+
+#### 1. Dashboard principal :
+- **Métriques temps réel** : SMS envoyés aujourd'hui, téléphones en ligne, SIMs actives, messages en attente
+- **Graphiques** : Évolution envois (7 derniers jours), répartition par SIM, taux succès
+- **Cartes statut** : Chaque téléphone avec indicateur online/offline pulsant
+- **Alertes** : Notifications quotas atteints, téléphones déconnectés, erreurs système
+- **Activité récente** : Derniers SMS envoyés avec statuts
+
+#### 2. Gestion téléphones :
+- **Tableau responsive** : ID, modèle, statut, dernière connexion, SIMs, actions
+- **Filtres** : Par statut, modèle, dernière activité
+- **Actions** : Voir détails, redémarrer service, configurer, supprimer
+- **Modal détails** : Informations complètes + historique connexions
+- **Indicateurs visuels** : Points colorés pour statuts, badges pour nombre SIMs
+
+#### 3. Gestion SIMs :
+- **Vue grille/tableau** : Numéro, opérateur, téléphone, quotas, messages envoyés
+- **Configuration** : Modal pour limites quotidiennes, statut actif/inactif
+- **Statistiques** : Graphiques utilisation, destinataires uniques
+- **Basculement** : Interface pour définir SIM par défaut + ordre priorité
+- **Monitoring** : Alertes visuelles si quotas proches
+
+#### 4. Envoi SMS :
+- **Formulaire simple** : Destinataire, message, choix SIM (optionnel)
+- **Envoi masse** : Upload CSV, zone texte multi-lignes, sélection SIM
+- **Prévisualisation** : Aperçu message + estimation coût
+- **Validation temps réel** : Format numéros, longueur message
+- **Historique rapide** : Derniers destinataires pour re-envoi facile
+- **Templates** : Messages prédéfinis sauvegardables
+
+#### 5. Historique & Analytics :
+- **Tableau paginé** : Tous SMS avec filtres avancés (date, numéro, SIM, statut)
+- **Recherche** : Recherche textuelle dans messages + numéros
+- **Export** : CSV, PDF avec filtres appliqués
+- **Graphiques** : Évolution temporelle, répartition par statut/SIM
+- **Statistiques** : Taux succès, temps moyen envoi, pics d'activité
+
+#### 6. Configuration système :
+- **Paramètres généraux** : SIM par défaut, basculement auto, limites globales
+- **Notifications** : Email alerts, webhooks, seuils d'alerte
+- **Sécurité** : Gestion utilisateurs, changement mots de passe, API keys
+- **Maintenance** : Nettoyage logs, sauvegarde BDD, redémarrage services
+- **Monitoring** : État services, utilisation ressources, logs système
+
+### Interface responsive obligatoire :
+- **Mobile-first** : Navigation burger, cartes empilées, tableaux scrollables
+- **Breakpoints** : 768px (tablet), 1024px (desktop), 1440px (large)
+- **Touch-friendly** : Boutons 44px minimum, espacement généreux
+- **Performance** : Lazy loading, pagination, optimisation images
+
+## 📱 APPLICATION ANDROID
+
+### Fonctionnalités obligatoires :
+
+#### 1. Configuration initiale :
+- **Assistant setup** : 4 étapes (serveur, permissions, SIMs, test)
+- **Connexion serveur** : URL API + clé authentification avec test connexion
+- **Permissions** : Demande SMS, PHONE, INTERNET + vérification continue
+- **Auto-enregistrement** : Envoi infos téléphone au serveur (modèle, SIMs détectées)
+- **Validation** : Test envoi SMS + heartbeat avant finalisation
+
+#### 2. Service arrière-plan :
+- **Service persistant** : Foreground service avec notification permanente
+- **Polling intelligent** : Vérification messages toutes les 10-30s (adaptatif)
+- **Envoi SMS** : Traitement queue avec retry automatique (3 tentatives)
+- **Heartbeat** : Signal vie au serveur toutes les 30s avec état SIMs
+- **Gestion réseau** : Reconnexion auto, cache local si offline
+
+#### 3. Gestion multi-SIM :
+- **Détection auto** : Scan SIMs disponibles au démarrage + changements
+- **Sélection intelligente** : Choix SIM selon configuration serveur
+- **Basculement** : Switch automatique si SIM principale indisponible
+- **Monitoring** : Surveillance état SIMs + rapport anomalies
+
+#### 4. Interface utilisateur :
+- **Dashboard** : Statut connexion, messages envoyés/jour, SIMs actives
+- **Configuration** : URL serveur, intervalle polling, notifications
+- **Logs locaux** : Historique actions avec niveaux (info/warning/error)
+- **Diagnostics** : Tests connexion, permissions, état SIMs, envoi test
+- **Statistiques** : Graphiques envois, répartition SIMs, taux succès
+
+#### 5. Optimisations :
+- **Batterie** : Doze mode compatibility, optimisations énergétiques
+- **Réseau** : Compression données, cache intelligent, retry exponential
+- **Notifications** : Alertes erreurs critiques, résumés quotidiens
+- **Sécurité** : Chiffrement communications, validation certificats serveur
+- **Performance** : Threading optimal, gestion mémoire, cleanup automatique
+
+### Architecture Android :
+```kotlin
+// Composants principaux
+MainActivity : Interface principale + configuration
+SmsService : Service arrière-plan pour envoi
+ApiClient : Communication serveur (Retrofit/OkHttp)
+SmsManager : Gestion envoi multi-SIM
+DatabaseHelper : Cache local SQLite
+NotificationManager : Notifications système
+ConfigManager : Gestion configuration locale
+```
+
+## 🚀 FONCTIONNALITÉS AVANCÉES
+
+### Backend avancé :
+1. **Templates SMS** : Messages prédéfinis avec variables
+2. **Planification** : Envois programmés (date/heure)
+3. **Webhooks** : Notifications externes (succès/échec)
+4. **API externe** : Endpoints pour intégration tiers
+5. **Analytics** : Rapports détaillés, métriques performance
+6. **Backup auto** : Sauvegarde quotidienne BDD
+7. **Load balancing** : Répartition charge multi-serveurs
+8. **Monitoring** : Surveillance proactive avec alertes
+
+### Frontend avancé :
+1. **Thèmes** : Mode sombre/clair + personnalisation couleurs
+2. **Widgets** : Composants réutilisables (graphiques, cartes)
+3. **PWA** : Application web progressive avec offline
+4. **Temps réel** : WebSockets pour mises à jour live
+5. **Internationalisation** : Support multi-langues
+6. **Accessibilité** : WCAG compliance, navigation clavier
+7. **Performance** : Code splitting, lazy loading, caching
+8. **Tests** : Unit tests + E2E avec Cypress/Playwright
+
+### Android avancé :
+1. **Géolocalisation** : Tracking position pour analytics
+2. **Chiffrement** : Messages chiffrés bout-en-bout
+3. **Backup cloud** : Synchronisation configuration
+4. **Widget home** : Widget écran accueil avec stats
+5. **Intents** : Intégration autres apps (partage)
+6. **Wear OS** : Support montres connectées
+7. **Auto-update** : Mise à jour automatique APK
+8. **Crash reporting** : Rapports erreurs automatiques
+
+## 🔒 SÉCURITÉ OBLIGATOIRE
+
+### Backend :
+- **Authentification JWT** : Tokens avec expiration
+- **Rate limiting** : 100 req/min par IP
+- **Validation stricte** : Sanitisation toutes entrées
+- **HTTPS obligatoire** : Certificats SSL/TLS
+- **Audit logs** : Traçabilité complète actions
+- **Chiffrement BDD** : Données sensibles chiffrées
+- **Firewall** : Restriction accès ports
+- **Backup sécurisé** : Chiffrement sauvegardes
+
+### Frontend :
+- **CSP headers** : Content Security Policy
+- **XSS protection** : Sanitisation affichage
+- **CSRF tokens** : Protection requêtes
+- **Session management** : Timeout automatique
+- **Input validation** : Validation côté client + serveur
+- **Secure cookies** : HttpOnly, Secure flags
+- **Error handling** : Pas d'exposition infos sensibles
+
+### Android :
+- **Certificat pinning** : Validation serveur
+- **Obfuscation** : Code obfusqué (ProGuard)
+- **Root detection** : Blocage appareils rootés
+- **Keystore** : Stockage sécurisé clés
+- **Network security** : Config réseau sécurisée
+- **App signing** : Signature APK obligatoire
+- **Permissions minimales** : Principe moindre privilège
+
+## 📦 DÉPLOIEMENT
+
+### Serveur production :
+- **OS** : Ubuntu 20.04+ LTS
+- **Reverse proxy** : Nginx avec SSL
+- **Process manager** : PM2 avec cluster mode
+- **Base données** : MySQL 8.0+ avec réplication
+- **Monitoring** : Prometheus + Grafana
+- **Logs** : ELK Stack (Elasticsearch, Logstash, Kibana)
+- **Backup** : Scripts automatisés quotidiens
+- **CDN** : CloudFlare pour assets statiques
+
+### Configuration Nginx :
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name sms-gateway.com;
+    
+    ssl_certificate /etc/letsencrypt/live/sms-gateway.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/sms-gateway.com/privkey.pem;
+    
+    # Frontend
+    location / {
+        root /var/www/sms-gateway/frontend;
+        try_files $uri $uri/ /index.html;
+        gzip on;
+        expires 1y;
+    }
+    
+    # API Backend
+    location /api/ {
+        proxy_pass http://localhost:3001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### Scripts déploiement :
+1. **deploy.sh** : Déploiement automatisé complet
+2. **backup.sh** : Sauvegarde BDD + fichiers
+3. **update.sh** : Mise à jour application
+4. **monitor.sh** : Surveillance système
+5. **restore.sh** : Restauration depuis backup
+
+## ✅ CHECKLIST VALIDATION
+
+### Backend :
+- [ ] Toutes routes API fonctionnelles
+- [ ] Gestion erreurs robuste
+- [ ] Authentification sécurisée
+- [ ] Base données optimisée
+- [ ] Logging complet
+- [ ] Tests unitaires
+- [ ] Documentation API
+- [ ] Performance optimisée
+
+### Frontend :
+- [ ] Design cyberpunk complet
+- [ ] Toutes pages fonctionnelles
+- [ ] Responsive parfait
+- [ ] Animations fluides
+- [ ] Gestion erreurs
+- [ ] Tests E2E
+- [ ] Accessibilité
+- [ ] Performance optimisée
+
+### Android :
+- [ ] Service arrière-plan stable
+- [ ] Gestion multi-SIM
+- [ ] Interface intuitive
+- [ ] Optimisations batterie
+- [ ] Gestion erreurs
+- [ ] Tests sur appareils
+- [ ] Sécurité renforcée
+- [ ] Documentation utilisateur
+
+### Déploiement :
+- [ ] Serveur configuré
+- [ ] SSL activé
+- [ ] Monitoring en place
+- [ ] Backups automatiques
+- [ ] Scripts déploiement
+- [ ] Documentation admin
+- [ ] Tests production
+- [ ] Plan maintenance
+
+## 🎯 LIVRABLES ATTENDUS
+
+1. **Code source complet** : Backend + Frontend + Android
+2. **Base données** : Scripts création + données test
+3. **Documentation** : Installation, configuration, utilisation
+4. **Scripts déploiement** : Automatisation complète
+5. **Tests** : Suites tests automatisés
+6. **Configuration** : Fichiers environnement
+7. **Monitoring** : Dashboards + alertes
+8. **Manuel utilisateur** : Guide complet
+
+Cette spécification complète permet de recréer votre application SMS Gateway avec toutes ses fonctionnalités. Chaque composant est détaillé avec les technologies, fonctionnalités et exigences précises.
