@@ -134,8 +134,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="message" class="form-label">Message:</label>
-                            <textarea class="form-control cyber-input" id="message" rows="4" placeholder="Votre message..." required maxlength="160"></textarea>
-                            <small class="text-info">Caractères: <span id="charCount">0</span>/160</small>
+                            <textarea class="form-control cyber-input" id="message" rows="4" placeholder="Votre message..." required></textarea>
+                            <small class="text-info">Caractères: <span id="charCount">0</span></small>
                         </div>
                         <button type="submit" class="btn btn-cyber w-100">
                             <i class="fas fa-rocket"></i> Envoyer SMS
@@ -180,6 +180,17 @@
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
+            // FORCER la suppression immédiate de toute limitation
+            setTimeout(() => {
+                const messageField = document.getElementById('message');
+                if (messageField) {
+                    messageField.removeAttribute('maxlength');
+                    messageField.removeAttribute('maxLength');
+                    messageField.maxLength = -1; // Pas de limite
+                    console.log('✅ Limitations supprimées au chargement');
+                }
+            }, 100);
+            
             loadData();
             setupEventListeners();
             
@@ -193,12 +204,50 @@
             
             // Compteur de caractères
             document.getElementById('message').addEventListener('input', updateCharCount);
+            
+            // FORCER la suppression de toute limitation de caractères
+            const messageField = document.getElementById('message');
+            if (messageField) {
+                messageField.removeAttribute('maxlength');
+                messageField.removeAttribute('maxLength');
+                messageField.style.maxLength = 'none';
+            }
         }
 
         function updateCharCount() {
-            const message = document.getElementById('message').value;
+            const messageField = document.getElementById('message');
+            const message = messageField.value;
+            
+            // Double vérification : supprimer toute limitation
+            messageField.removeAttribute('maxlength');
+            messageField.removeAttribute('maxLength');
+            
+            // Debug : vérifier s'il y a encore des limitations
+            if (messageField.hasAttribute('maxlength') || messageField.hasAttribute('maxLength')) {
+                console.log('⚠️ Limitation détectée et supprimée');
+            }
+            
             document.getElementById('charCount').textContent = message.length;
         }
+
+        // Fonction de test pour vérifier les limitations
+        function testMessageField() {
+            const messageField = document.getElementById('message');
+            console.log('🔍 Test du champ message:');
+            console.log('- maxlength:', messageField.getAttribute('maxlength'));
+            console.log('- maxLength:', messageField.maxLength);
+            console.log('- Longueur actuelle:', messageField.value.length);
+            console.log('- Peut saisir plus?', messageField.value.length < 200 ? 'Testez en tapant plus de texte' : 'OK');
+            
+            // Forcer la suppression si nécessaire
+            messageField.removeAttribute('maxlength');
+            messageField.removeAttribute('maxLength');
+            messageField.maxLength = -1;
+            console.log('✅ Nettoyage forcé effectué');
+        }
+
+        // Rendre la fonction accessible globalement pour debug
+        window.testMessageField = testMessageField;
 
         async function loadData() {
             await Promise.all([

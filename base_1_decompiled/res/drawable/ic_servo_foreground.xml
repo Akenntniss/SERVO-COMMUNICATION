@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Minimal futuristic S monogram -->
+    <group android:pivotX="54" android:pivotY="54">
+        <!-- Outer neon ring (thin) -->
+        <path
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="#00F5FF"
+            android:strokeWidth="2.5"
+            android:strokeAlpha="0.7"
+            android:pathData="M54,54m-36,0a36,36 0,1 1,72 0a36,36 0,1 1,-72 0" />
+
+        <!-- Stylized S made of two arcs -->
+        <path
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="#39FF14"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:pathData="M72,36 C60,28 48,28 36,36" />
+        <path
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="#39FF14"
+            android:strokeWidth="6"
+            android:strokeLineCap="round"
+            android:pathData="M36,72 C48,80 60,80 72,72" />
+
+        <!-- Small accent dot -->
+        <path
+            android:fillColor="#BF00FF"
+            android:pathData="M54,54m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0" />
+    </group>
+
+</vector>
+

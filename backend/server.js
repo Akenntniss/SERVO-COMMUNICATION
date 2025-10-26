@@ -11,6 +11,8 @@ const PORT = process.env.PORT || 3001;
 
 // Services
 const cleanupService = new DatabaseCleanupService();
+const SurveillanceImmediate = require('./services/surveillance-immediate');
+const surveillanceImmediate = new SurveillanceImmediate();
 
 // Middleware
 app.use(cors());
@@ -104,14 +106,17 @@ async function startServer() {
       console.log(`📲 APK Download: http://168.231.85.4:${PORT}/download/apk`);
       console.log('✅ Prêt à recevoir des requêtes');
       
-      // Démarrer le service Auto-Switch
-      autoSwitchService.start();
-      
-      // Démarrer le système de monitoring des timeouts
-      retrySystem.startTimeoutMonitoring();
-      
-      // Démarrer le service de nettoyage de la base de données
-      cleanupService.start();
+            // Démarrer le service Auto-Switch
+            autoSwitchService.start();
+            
+            // Démarrer le système de monitoring des timeouts
+            retrySystem.startTimeoutMonitoring();
+            
+            // DÉMARRER LA SURVEILLANCE IMMÉDIATE ET FORCÉE
+            surveillanceImmediate.demarrerSurveillanceAutomatique();
+            
+            // Démarrer le service de nettoyage de la base de données
+            cleanupService.start();
     });
     
   } catch (error) {

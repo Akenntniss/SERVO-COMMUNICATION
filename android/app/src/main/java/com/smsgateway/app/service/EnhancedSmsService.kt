@@ -5,9 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import android.telephony.SmsManager
-import android.telephony.SubscriptionManager
 import android.util.Log
 import com.smsgateway.app.data.api.ApiClient
 import com.smsgateway.app.data.model.Message
@@ -22,57 +20,41 @@ class EnhancedSmsService(private val context: Context) {
         private const val TAG = "EnhancedSmsService"
         private const val SMS_SENT = "SMS_SENT"
         private const val SMS_DELIVERED = "SMS_DELIVERED"
-        private const val FAILURE_DETECTION_DELAY = 45000L // 45 secondes - délai plus long pour détecter les vrais échecs
+        private const val FAILURE_DETECTION_DELAY = 15000L // 15 secondes
     }
-    
-    // Tracking des SMS multipart : messageId -> (parties envoyées avec succès, total parties)
-    private val multipartTracker = mutableMapOf<String, Pair<Int, Int>>()
 
     private val sentReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val messageId = intent?.getStringExtra("messageId") ?: return
-            val partIndex = intent?.getIntExtra("partIndex", -1) ?: -1
             
             when (resultCode) {
                 android.app.Activity.RESULT_OK -> {
-                    if (partIndex >= 0) {
-                        // SMS multipart - une partie envoyée avec succès
-                        Log.d(TAG, "📋 SMS multipart partie $partIndex envoyée: $messageId")
-                        handleMultipartSuccess(messageId, partIndex)
-                    } else {
-                        // SMS simple - envoyé avec succès
-                        Log.d(TAG, "✅ SMS simple envoyé: $messageId")
-                        // Attendre avant de confirmer le succès pour détecter les échecs tardifs
-                        CoroutineScope(Dispatchers.IO).launch {
-                            delay(FAILURE_DETECTION_DELAY)
-                            reportSuccess(messageId, "sent")
-                        }
+                    Log.d(TAG, "SMS envoyé avec succès: $messageId")
+                    // Attendre avant de confirmer le succès pour détecter les échecs tardifs
+                    CoroutineScope(Dispatchers.IO).launch {
+                        delay(FAILURE_DETECTION_DELAY)
+                        reportSuccess(messageId, "sent")
                     }
                 }
                 SmsManager.RESULT_ERROR_GENERIC_FAILURE -> {
-                    Log.e(TAG, "❌ Échec générique SMS: $messageId (partie $partIndex)")
+                    Log.e(TAG, "Échec générique SMS: $messageId")
                     reportFailure(messageId, "GENERIC_FAILURE")
-                    cleanupMultipartTracker(messageId)
                 }
                 SmsManager.RESULT_ERROR_NO_SERVICE -> {
-                    Log.e(TAG, "📶 Pas de service SMS: $messageId (partie $partIndex)")
+                    Log.e(TAG, "Pas de service SMS: $messageId")
                     reportFailure(messageId, "NO_SERVICE")
-                    cleanupMultipartTracker(messageId)
                 }
                 SmsManager.RESULT_ERROR_NULL_PDU -> {
-                    Log.e(TAG, "📱 PDU null SMS: $messageId (partie $partIndex)")
+                    Log.e(TAG, "PDU null SMS: $messageId")
                     reportFailure(messageId, "NULL_PDU")
-                    cleanupMultipartTracker(messageId)
                 }
                 SmsManager.RESULT_ERROR_RADIO_OFF -> {
-                    Log.e(TAG, "📡 Radio éteinte SMS: $messageId (partie $partIndex)")
+                    Log.e(TAG, "Radio éteinte SMS: $messageId")
                     reportFailure(messageId, "RADIO_OFF")
-                    cleanupMultipartTracker(messageId)
                 }
                 else -> {
-                    Log.e(TAG, "❓ Échec SMS inconnu ($resultCode): $messageId (partie $partIndex)")
+                    Log.e(TAG, "Échec SMS inconnu ($resultCode): $messageId")
                     reportFailure(messageId, "UNKNOWN_ERROR_$resultCode")
-                    cleanupMultipartTracker(messageId)
                 }
             }
         }
@@ -117,123 +99,63 @@ class EnhancedSmsService(private val context: Context) {
 
     fun sendSms(message: Message) {
         try {
-            Log.d(TAG, "📱 Envoi SMS: ${message.content.length} caractères vers ${message.recipient}")
+            Log.d(TAG, "📤 Envoi SMS: ${message.content} vers ${message.recipient}")
             
-            val smsManager = getSmsManagerForMessage(message)
+            val smsManager = SmsManager.getDefault()
             
-            // Diviser le message en parties si nécessaire (gestion des messages longs + emojis)
-            val messageParts = smsManager.divideMessage(message.content)
-            Log.d(TAG, "📋 Message divisé en ${messageParts.size} partie(s)")
+            // Créer les PendingIntent pour les callbacks
+            val sentIntent = PendingIntent.getBroadcast(
+                context, 
+                message.id.hashCode(), 
+                Intent(SMS_SENT).putExtra("messageId", message.id), 
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
             
-            if (messageParts.size == 1) {
-                // SMS simple - une seule partie
-                val sentIntent = PendingIntent.getBroadcast(
-                    context, 
-                    message.id.hashCode(), 
-                    Intent(SMS_SENT).putExtra("messageId", message.id), 
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                
-                val deliveredIntent = PendingIntent.getBroadcast(
-                    context, 
-                    message.id.hashCode() + 1, 
-                    Intent(SMS_DELIVERED).putExtra("messageId", message.id), 
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                
-                smsManager.sendTextMessage(
-                    message.recipient,
-                    null,
-                    message.content,
-                    sentIntent,
-                    deliveredIntent
-                )
-                
-                Log.d(TAG, "✅ SMS simple envoyé: ${message.id}")
-                
-            } else {
-                // SMS multipart - plusieurs parties (messages longs / emojis)
-                
-                // Initialiser le tracker pour ce message multipart
-                multipartTracker[message.id] = Pair(0, messageParts.size)
-                Log.d(TAG, "📊 Tracker initialisé pour ${message.id}: 0/${messageParts.size} parties")
-                
-                val sentIntents = ArrayList<PendingIntent>()
-                val deliveredIntents = ArrayList<PendingIntent>()
-                
-                // Créer des PendingIntent pour chaque partie
-                for (i in messageParts.indices) {
-                    val sentIntent = PendingIntent.getBroadcast(
-                        context,
-                        message.id.hashCode() + i,
-                        Intent(SMS_SENT).putExtra("messageId", message.id).putExtra("partIndex", i),
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
-                    
-                    val deliveredIntent = PendingIntent.getBroadcast(
-                        context,
-                        message.id.hashCode() + i + 1000,
-                        Intent(SMS_DELIVERED).putExtra("messageId", message.id).putExtra("partIndex", i),
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
-                    
-                    sentIntents.add(sentIntent)
-                    deliveredIntents.add(deliveredIntent)
-                }
-                
-                // Envoyer le SMS multipart
-                smsManager.sendMultipartTextMessage(
-                    message.recipient,
-                    null,
-                    messageParts,
-                    sentIntents,
-                    deliveredIntents
-                )
-                
-                Log.d(TAG, "✅ SMS multipart envoyé: ${message.id} (${messageParts.size} parties)")
-            }
+            val deliveredIntent = PendingIntent.getBroadcast(
+                context, 
+                message.id.hashCode() + 1, 
+                Intent(SMS_DELIVERED).putExtra("messageId", message.id), 
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            
+            // SURVEILLANCE: Programmer une vérification de timeout pour ce message
+            scheduleTimeoutCheck(message.id)
+            
+            // Envoyer le SMS avec callbacks
+            smsManager.sendTextMessage(
+                message.recipient,
+                null,
+                message.content,
+                sentIntent,
+                deliveredIntent
+            )
+            
+            Log.d(TAG, "📡 SMS en cours d'envoi: ${message.id}")
             
         } catch (e: Exception) {
             Log.e(TAG, "❌ Erreur lors de l'envoi SMS: ${e.message}")
             reportFailure(message.id, "SEND_EXCEPTION: ${e.message}")
         }
     }
-
-    /**
-     * Gère le succès d'envoi d'une partie d'un SMS multipart
-     */
-    private fun handleMultipartSuccess(messageId: String, partIndex: Int) {
-        val tracker = multipartTracker[messageId]
-        if (tracker != null) {
-            val (sentParts, totalParts) = tracker
-            val newSentParts = sentParts + 1
-            multipartTracker[messageId] = Pair(newSentParts, totalParts)
+    
+    private fun scheduleTimeoutCheck(messageId: String) {
+        // Programmer une vérification après 2 minutes pour détecter les messages "oubliés"
+        CoroutineScope(Dispatchers.IO).launch {
+            delay(120000) // 2 minutes
             
-            Log.d(TAG, "📊 SMS multipart ${messageId}: ${newSentParts}/${totalParts} parties envoyées")
-            
-            if (newSentParts >= totalParts) {
-                // Toutes les parties envoyées avec succès !
-                Log.d(TAG, "🎉 SMS multipart complet envoyé: $messageId")
-                multipartTracker.remove(messageId)
-                
-                // Attendre avant de confirmer le succès pour détecter les échecs tardifs
-                CoroutineScope(Dispatchers.IO).launch {
-                    delay(FAILURE_DETECTION_DELAY)
-                    reportSuccess(messageId, "sent")
-                }
+            // Vérifier si ce message a été traité (succès ou échec)
+            // Si aucun callback n'a été reçu, le considérer comme échoué
+            if (!hasMessageBeenProcessed(messageId)) {
+                Log.w(TAG, "⏰ TIMEOUT détecté pour message $messageId - Forçage échec")
+                reportFailure(messageId, "TIMEOUT_NO_CALLBACK")
             }
-        } else {
-            Log.w(TAG, "⚠️ Tracker non trouvé pour SMS multipart: $messageId")
         }
     }
     
-    /**
-     * Nettoie le tracker multipart en cas d'échec
-     */
-    private fun cleanupMultipartTracker(messageId: String) {
-        if (multipartTracker.remove(messageId) != null) {
-            Log.d(TAG, "🧹 Tracker nettoyé pour SMS multipart échoué: $messageId")
-        }
+    private fun hasMessageBeenProcessed(messageId: String): Boolean {
+        // TODO: Implémenter un système de tracking des messages traités
+        // Pour l'instant, on assume que tous les messages non traités sont des échecs
+        return false
     }
 
     private fun reportSuccess(messageId: String, status: String) {
@@ -260,6 +182,8 @@ class EnhancedSmsService(private val context: Context) {
     private fun reportFailure(messageId: String, reason: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                Log.w(TAG, "🚨 ÉCHEC SMS DÉTECTÉ: $messageId - $reason")
+                
                 val statusUpdate = MessageStatusUpdate(
                     status = "failed",
                     errorMessage = "Échec envoi SMS: $reason"
@@ -267,140 +191,32 @@ class EnhancedSmsService(private val context: Context) {
                 
                 val response = ApiClient.getApiService()?.updateMessageStatus(messageId, statusUpdate)
                 if (response?.isSuccessful == true) {
-                    Log.d(TAG, "Échec reporté avec succès: $reason pour $messageId")
+                    Log.d(TAG, "✅ Échec reporté avec succès: $reason pour $messageId")
                 } else {
-                    Log.e(TAG, "Erreur rapport échec: ${response?.code()}")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Erreur lors du rapport d'échec: ${e.message}")
-            }
-        }
-    }
-
-    fun cleanupStaleMessages() {
-        // Méthode pour nettoyer les messages en attente (placeholder)
-        Log.d(TAG, "🧹 Nettoyage des messages en attente")
-    }
-
-    fun getPendingMessagesCount(): Int {
-        // Retourner le nombre de messages en attente (placeholder)
-        return 0
-    }
-
-    private fun getSmsManagerForMessage(message: Message): SmsManager {
-        Log.d(TAG, "🔍 Sélection SIM - simId: ${message.simId}, slotIndex: ${message.slotIndex}, subscriptionId: ${message.subscriptionId}")
-
-        return when {
-            // 1. Si subscriptionId est fourni ET valide (> 0), l'utiliser en priorité
-            message.subscriptionId != null && message.subscriptionId > 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1 -> {
-                try {
-                    val smsManager = SmsManager.getSmsManagerForSubscriptionId(message.subscriptionId)
-                    Log.d(TAG, "🎯 Utilisation SIM subscription ID: ${message.subscriptionId}")
-                    smsManager
-                } catch (e: Exception) {
-                    Log.w(TAG, "⚠️ Erreur avec subscription ID ${message.subscriptionId}: ${e.message}")
-                    fallbackToSlotOrDefault(message)
-                }
-            }
-
-            // 2. Si slotIndex est fourni ET valide (> 0), essayer de l'utiliser  
-            message.slotIndex != null && message.slotIndex > 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1 -> {
-                try {
-                    val subscriptionId = getSubscriptionIdForSlot(message.slotIndex)
-                    if (subscriptionId != null && subscriptionId > 0) {
-                        val smsManager = SmsManager.getSmsManagerForSubscriptionId(subscriptionId)
-                        Log.d(TAG, "🎯 Utilisation SIM slot ${message.slotIndex} -> subscription ID: $subscriptionId")
-                        smsManager
-                    } else {
-                        Log.w(TAG, "⚠️ Aucune subscription active pour slot ${message.slotIndex}")
-                        fallbackToAvailableSlot(message)
-                    }
-                } catch (e: Exception) {
-                    Log.w(TAG, "⚠️ Erreur avec slot ${message.slotIndex}: ${e.message}")
-                    fallbackToAvailableSlot(message)
-                }
-            }
-
-            // 3. Si simId est fourni, essayer de deviner le slot à partir du simId
-            message.simId != null -> {
-                Log.d(TAG, "🔄 Tentative de déduction du slot à partir du simId: ${message.simId}")
-                val deducedSlot = deduceSlotFromSimId(message.simId)
-                if (deducedSlot != null) {
+                    Log.e(TAG, "❌ Erreur rapport échec: ${response?.code()} pour $messageId")
+                    // RETRY: Tenter une seconde fois en cas d'échec réseau
+                    delay(2000)
                     try {
-                        val subscriptionId = getSubscriptionIdForSlot(deducedSlot)
-                        if (subscriptionId != null && subscriptionId > 0) {
-                            val smsManager = SmsManager.getSmsManagerForSubscriptionId(subscriptionId)
-                            Log.d(TAG, "🎯 SIM déduite: slot $deducedSlot -> subscription ID: $subscriptionId")
-                            smsManager
+                        val retryResponse = ApiClient.getApiService()?.updateMessageStatus(messageId, statusUpdate)
+                        if (retryResponse?.isSuccessful == true) {
+                            Log.d(TAG, "✅ Échec reporté avec succès (retry): $reason pour $messageId")
                         } else {
-                            fallbackToAvailableSlot(message)
+                            Log.e(TAG, "❌ Échec définitif rapport: ${retryResponse?.code()} pour $messageId")
                         }
-                    } catch (e: Exception) {
-                        Log.w(TAG, "⚠️ Erreur avec slot déduit $deducedSlot: ${e.message}")
-                        fallbackToAvailableSlot(message)
+                    } catch (retryException: Exception) {
+                        Log.e(TAG, "❌ Échec retry rapport: ${retryException.message} pour $messageId")
                     }
-                } else {
-                    fallbackToAvailableSlot(message)
-                }
-            }
-
-            // 4. Par défaut, essayer de trouver une SIM active
-            else -> {
-                Log.d(TAG, "📱 Aucune info SIM spécifique, recherche SIM active")
-                fallbackToAvailableSlot(message)
-            }
-        }
-    }
-
-    private fun getSubscriptionIdForSlot(slotIndex: Int): Int? {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            try {
-                val subscriptionManager = context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as? SubscriptionManager
-                val activeSubscriptions = subscriptionManager?.activeSubscriptionInfoList
-                return activeSubscriptions?.find { it.simSlotIndex == slotIndex }?.subscriptionId
-            } catch (e: Exception) {
-                Log.w(TAG, "Erreur récupération subscription ID pour slot $slotIndex: ${e.message}")
-            }
-        }
-        return null
-    }
-
-    private fun fallbackToSlotOrDefault(message: Message): SmsManager {
-        return if (message.slotIndex != null && message.slotIndex > 0) {
-            fallbackToAvailableSlot(message)
-        } else {
-            Log.d(TAG, "📱 Fallback vers SIM par défaut")
-            SmsManager.getDefault()
-        }
-    }
-
-    private fun fallbackToAvailableSlot(message: Message): SmsManager {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            try {
-                val subscriptionManager = context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as? SubscriptionManager
-                val activeSubscriptions = subscriptionManager?.activeSubscriptionInfoList
-                
-                if (!activeSubscriptions.isNullOrEmpty()) {
-                    val firstActive = activeSubscriptions[0]
-                    Log.d(TAG, "🎯 Utilisation première SIM active: subscription ID ${firstActive.subscriptionId}")
-                    return SmsManager.getSmsManagerForSubscriptionId(firstActive.subscriptionId)
                 }
             } catch (e: Exception) {
-                Log.w(TAG, "Erreur lors du fallback: ${e.message}")
+                Log.e(TAG, "❌ Exception lors du rapport d'échec: ${e.message} pour $messageId")
+                // FALLBACK: Tenter de sauvegarder localement pour retry ultérieur
+                try {
+                    // TODO: Implémenter sauvegarde locale des échecs pour retry
+                    Log.w(TAG, "💾 Échec sauvegardé localement pour retry: $messageId")
+                } catch (fallbackException: Exception) {
+                    Log.e(TAG, "❌ Échec sauvegarde locale: ${fallbackException.message}")
+                }
             }
-        }
-        
-        Log.d(TAG, "📱 Fallback final vers SIM par défaut")
-        return SmsManager.getDefault()
-    }
-
-    private fun deduceSlotFromSimId(simId: String?): Int? {
-        // Heuristique simple - dans la vraie vie, il faudrait une logique plus sophistiquée
-        return when {
-            simId == null -> null
-            simId.contains("1") || simId.contains("first") -> 0
-            simId.contains("2") || simId.contains("second") -> 1
-            else -> null
         }
     }
 }

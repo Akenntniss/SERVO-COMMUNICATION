@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView android:id="@id/cardPermission" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="8.0dip" app:cardBackgroundColor="@color/surface" app:cardCornerRadius="8.0dip" app:cardElevation="2.0dip"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="horizontal" android:padding="16.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <ImageView android:layout_gravity="center_vertical" android:id="@id/ivPermissionStatus" android:layout_width="24.0dip" android:layout_height="24.0dip" android:src="@drawable/ic_check_circle" />
+        <LinearLayout android:orientation="vertical" android:layout_width="0.0dip" android:layout_height="wrap_content" android:layout_weight="1.0" android:layout_marginStart="16.0dip">
+            <TextView android:textSize="16.0sp" android:textStyle="bold" android:textColor="@color/text_primary" android:id="@id/tvPermissionName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nom de la permission" />
+            <TextView android:textSize="14.0sp" android:textColor="@color/text_secondary" android:id="@id/tvPermissionDescription" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="Description de la permission" />
+        </LinearLayout>
+        <TextView android:textSize="10.0sp" android:textStyle="bold" android:textColor="@color/white" android:layout_gravity="center_vertical" android:id="@id/tvPermissionBadge" android:background="@drawable/badge_background" android:paddingLeft="8.0dip" android:paddingTop="4.0dip" android:paddingRight="8.0dip" android:paddingBottom="4.0dip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="REQUIS" android:paddingHorizontal="8.0dip" android:paddingVertical="4.0dip" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -79,7 +79,7 @@ object SimUtils {
                     simCards.add(simInfo)
                     Log.d(TAG, "✅ SIM ${index + 1}: ${simInfo.carrierName ?: "Opérateur inconnu"} (slot ${simInfo.slotIndex})")
                     Log.d(TAG, "   📞 Numéro: ${simInfo.phoneNumber ?: "Non disponible"}")
-                    Log.d(TAG, "   🌍 Pays: ${simInfo.countryIso ?: "Non disponible"}")
+                    Log.d(TAG, "   🌍 Pays: ${simInfo.countryCode ?: "Non disponible"}")
                     Log.d(TAG, "   🆔 ID: ${simInfo.subscriptionId}")
                     Log.d(TAG, "   📡 Opérateur: ${simInfo.carrierName ?: "Non disponible"}")
                     Log.d(TAG, "   📍 Slot: ${simInfo.slotIndex}")
@@ -87,7 +87,7 @@ object SimUtils {
                     Log.d(TAG, "   📊 Nom d'affichage: ${subscription.displayName}")
                     Log.d(TAG, "   🏷️ Couleur: ${subscription.iconTint}")
                     Log.d(TAG, "   📱 Code MCC/MNC: ${subscription.mcc}${subscription.mnc}")
-                    Log.d(TAG, "   ⚠️ Champs NULL: phone=${simInfo.phoneNumber == null}, carrier=${simInfo.carrierName == null}, country=${simInfo.countryIso == null}")
+                    Log.d(TAG, "   ⚠️ Champs NULL: phone=${simInfo.phoneNumber == null}, carrier=${simInfo.carrierName == null}, country=${simInfo.countryCode == null}")
                 } catch (e: Exception) {
                     Log.e(TAG, "❌ Erreur lors du traitement de l'abonnement $index: ${e.message}")
                 }
@@ -107,10 +107,9 @@ object SimUtils {
             slotIndex = subscription.simSlotIndex,
             phoneNumber = if (subscription.number.isNullOrEmpty()) null else subscription.number,
             carrierName = if (subscription.carrierName.isNullOrEmpty()) null else subscription.carrierName?.toString(),
-            countryIso = if (subscription.countryIso.isNullOrEmpty()) null else subscription.countryIso,
+            countryCode = if (subscription.countryIso.isNullOrEmpty()) null else subscription.countryIso,
             subscriptionId = subscription.subscriptionId,
-            isActive = true,
-            isRoaming = false
+            isActive = true
         )
     }
     
@@ -135,7 +134,7 @@ object SimUtils {
                 slotIndex = 0,
                 phoneNumber = if (telephonyManager.line1Number.isNullOrEmpty()) null else telephonyManager.line1Number,
                 carrierName = if (telephonyManager.networkOperatorName.isNullOrEmpty()) null else telephonyManager.networkOperatorName,
-                countryIso = if (telephonyManager.networkCountryIso.isNullOrEmpty()) null else telephonyManager.networkCountryIso,
+                countryCode = if (telephonyManager.networkCountryIso.isNullOrEmpty()) null else telephonyManager.networkCountryIso,
                 subscriptionId = 0,
                 isActive = true
             )

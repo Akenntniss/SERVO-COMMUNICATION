@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.smsgateway.app.data.api.ApiClient
 import com.smsgateway.app.data.model.Message
+import com.smsgateway.app.data.model.Heartbeat
 import com.smsgateway.app.service.EnhancedSmsService
 import com.smsgateway.app.utils.PreferencesManager
 import kotlinx.coroutines.CoroutineScope
@@ -191,7 +192,8 @@ class MessageManager(
         
         try {
             Log.d(TAG, "Envoi heartbeat pour téléphone: $phoneId")
-            val response = ApiClient.getApiService()?.sendHeartbeat(phoneId)
+            val heartbeat = Heartbeat(phoneId = phoneId)
+            val response = ApiClient.getApiService()?.sendHeartbeat(heartbeat)
             
             if (response?.isSuccessful == true) {
                 Log.d(TAG, "Heartbeat envoyé avec succès")
@@ -210,15 +212,11 @@ class MessageManager(
         scope.launch(Dispatchers.IO) {
             while (isPolling) {
                 try {
-                    // Nettoyer les messages obsolètes
-                    enhancedSmsService.cleanupStaleMessages()
-                    
                     // Log des statistiques
-                    val pendingCount = enhancedSmsService.getPendingMessagesCount()
                     val processingCount = processingMessages.size
                     
-                    if (pendingCount > 0 || processingCount > 0) {
-                        Log.d(TAG, "Statistiques: $processingCount messages en traitement, $pendingCount en attente de confirmation")
+                    if (processingCount > 0) {
+                        Log.d(TAG, "Statistiques: $processingCount messages en traitement")
                     }
                     
                 } catch (e: Exception) {
@@ -235,9 +233,8 @@ class MessageManager(
      */
     fun getDetailedStats(): String {
         val processingCount = processingMessages.size
-        val pendingCount = enhancedSmsService.getPendingMessagesCount()
         
-        return "Messages: $processingCount en traitement, $pendingCount en attente de confirmation"
+        return "Messages: $processingCount en traitement"
     }
 }
 

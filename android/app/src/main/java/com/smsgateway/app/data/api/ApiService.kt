@@ -7,15 +7,12 @@ import retrofit2.http.*
 interface ApiService {
     
     // Phone registration
-    @GET("api/phones")
-    suspend fun getPhones(): Response<ApiResponse<List<Phone>>>
-    
     @POST("api/phones/register")
     suspend fun registerPhone(@Body phoneRegistration: PhoneRegistration): Response<ApiResponse<Map<String, Any>>>
     
     // Heartbeat
-    @PUT("api/phones/{phoneId}/heartbeat")
-    suspend fun sendHeartbeat(@Path("phoneId") phoneId: String): Response<ApiResponse<String>>
+    @POST("api/phones/heartbeat")
+    suspend fun sendHeartbeat(@Body heartbeat: Heartbeat): Response<ApiResponse<String>>
     
     // Get pending messages
     @GET("api/messages/pending/{phoneId}")

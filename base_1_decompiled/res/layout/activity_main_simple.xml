@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:layout_width="fill_parent" android:layout_height="fill_parent" android:background="@drawable/ultra_futuristic_background" android:fillViewport="true" android:scrollbars="none"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout android:orientation="vertical" android:padding="24.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content">
+    
+    <!-- Animated Title with rotating ring -->
+    <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="32.0dip" android:gravity="center">
+        <ImageView android:layout_width="80dp" android:layout_height="80dp" android:src="@drawable/rotating_neon_ring" android:layout_centerInParent="true" android:alpha="0.7" />
+        <TextView android:id="@+id/title_main" android:textSize="32.0sp" android:textStyle="bold" android:textColor="@color/neon_cyan" android:gravity="center" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="◢ SERVO ◣" android:shadowColor="@color/glow_effect" android:shadowDx="0" android:shadowDy="0" android:shadowRadius="12" android:letterSpacing="0.15" android:layout_marginBottom="4.0dip" />
+        <TextView android:textSize="18.0sp" android:textStyle="bold" android:textColor="@color/neon_blue" android:gravity="center" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="COMMUNICATION" android:shadowColor="@color/hologram_blue" android:shadowDx="0" android:shadowDy="0" android:shadowRadius="8" android:letterSpacing="0.2" android:layout_below="@+id/title_main" />
+    </RelativeLayout>
+    <!-- Animated Status Section -->
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:background="@drawable/futuristic_card_background" android:padding="20.0dip" android:layout_marginBottom="20.0dip" android:animationCache="true">
+        <TextView android:textSize="12.0sp" android:textColor="@color/neon_cyan" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="◦ SYSTEM STATUS ◦" android:textStyle="bold" android:letterSpacing="0.1" android:layout_marginBottom="8.0dip" />
+        <TextView android:textSize="22.0sp" android:textColor="@color/neon_green" android:id="@id/tvServiceStatus" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="16.0dip" android:text="⚡ SYSTEM: OFFLINE" android:shadowColor="@color/glow_effect" android:shadowDx="0" android:shadowDy="0" android:shadowRadius="8" android:textStyle="bold" />
+    </LinearLayout>
+    
+    <!-- Animated Control Buttons -->
+    <Button android:textColor="@color/futuristic_background" android:id="@id/btnConfigureService" android:layout_width="fill_parent" android:layout_height="64dp" android:layout_marginBottom="12.0dip" android:text="⚙️ CONFIGURE SYSTEM" android:background="@drawable/animated_neon_button" android:textStyle="bold" android:letterSpacing="0.05" android:textSize="16sp" />
+    <Button android:textColor="@color/futuristic_background" android:id="@id/btnToggleService" android:layout_width="fill_parent" android:layout_height="64dp" android:layout_marginBottom="20.0dip" android:text="▶ ACTIVATE SYSTEM" android:background="@drawable/animated_neon_button" android:textStyle="bold" android:letterSpacing="0.05" android:textSize="16sp" />
+    <!-- Connection Status Card -->
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:background="@drawable/futuristic_card_background" android:padding="16.0dip" android:layout_marginBottom="16.0dip">
+        <TextView android:textSize="10.0sp" android:textColor="@color/neon_cyan" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="◦ CONNECTION STATUS ◦" android:textStyle="bold" android:letterSpacing="0.1" android:layout_marginBottom="6.0dip" />
+        <TextView android:textSize="18.0sp" android:textColor="@color/neon_orange" android:id="@id/tvConnectionStatus" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="8.0dip" android:text="🔴 DISCONNECTED" android:shadowColor="@color/neon_orange" android:shadowDx="0" android:shadowDy="0" android:shadowRadius="6" android:textStyle="bold" />
+        <TextView android:textSize="12.0sp" android:textColor="@color/text_secondary" android:id="@id/tvServerInfo" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="🏠 Server: 192.168.1.155:3001" />
+    </LinearLayout>
+    
+    <!-- Analytics Card -->
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:background="@drawable/futuristic_card_background" android:padding="16.0dip" android:layout_marginBottom="16.0dip">
+        <TextView android:textSize="10.0sp" android:textColor="@color/neon_cyan" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="◦ SYSTEM ANALYTICS ◦" android:textStyle="bold" android:letterSpacing="0.1" android:layout_marginBottom="6.0dip" />
+        <TextView android:textSize="16.0sp" android:textColor="@color/neon_green" android:id="@id/tvMessagesSent" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="8.0dip" android:text="📊 Messages sent today: 0" android:shadowColor="@color/glow_effect" android:shadowDx="0" android:shadowDy="0" android:shadowRadius="4" />
+        <TextView android:textSize="16.0sp" android:textColor="@color/neon_purple" android:id="@id/tvActiveSims" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="8.0dip" android:text="📡 Active SIMs: 0" android:shadowColor="@color/hologram_purple" android:shadowDx="0" android:shadowDy="0" android:shadowRadius="4" />
+        <TextView android:textSize="14.0sp" android:textColor="@color/neon_blue" android:id="@id/tvStatus" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="🔄 INITIALIZING..." android:shadowColor="@color/hologram_blue" android:shadowDx="0" android:shadowDy="0" android:shadowRadius="4" />
+    </LinearLayout>
+    
+    <!-- SIM Detection Card -->
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:background="@drawable/futuristic_card_background" android:padding="16.0dip" android:layout_marginBottom="24.0dip">
+        <TextView android:textSize="10.0sp" android:textColor="@color/neon_cyan" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="◦ SIM DETECTION ◦" android:textStyle="bold" android:letterSpacing="0.1" android:layout_marginBottom="6.0dip" />
+        <TextView android:textSize="14.0sp" android:textColor="@color/text_secondary" android:id="@id/tvPhoneInfo" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="8.0dip" android:text="📱 Device Information" />
+        <TextView android:textSize="14.0sp" android:textColor="@color/neon_pink" android:id="@id/tvSimsInfo" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="🔍 No SIM detected" android:shadowColor="@color/neon_pink" android:shadowDx="0" android:shadowDy="0" android:shadowRadius="4" />
+    </LinearLayout>
+    <!-- Control Panel -->
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:background="@drawable/futuristic_card_background" android:padding="16.0dip" android:layout_marginBottom="16.0dip">
+        <TextView android:textSize="10.0sp" android:textColor="@color/neon_cyan" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="◦ CONTROL PANEL ◦" android:textStyle="bold" android:letterSpacing="0.1" android:layout_marginBottom="12.0dip" />
+        
+        <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="12.0dip">
+            <Button android:textColor="@color/futuristic_background" android:id="@id/btnRefresh" android:layout_width="0.0dip" android:layout_height="60dp" android:text="🔄 REFRESH" android:layout_weight="1.0" android:layout_marginEnd="8.0dip" android:background="@drawable/animated_neon_button" android:textStyle="bold" android:letterSpacing="0.05" />
+            <Button android:textColor="@color/futuristic_background" android:id="@id/btnSettings" android:layout_width="0.0dip" android:layout_height="60dp" android:text="⚙️ CONFIG" android:layout_weight="1.0" android:layout_marginStart="4.0dip" android:layout_marginEnd="4.0dip" android:background="@drawable/animated_neon_button" android:textStyle="bold" android:letterSpacing="0.05" />
+            <Button android:textColor="@color/futuristic_background" android:id="@id/btnManageSims" android:layout_width="0.0dip" android:layout_height="60dp" android:text="🔧 SIM" android:layout_weight="1.0" android:layout_marginStart="8.0dip" android:background="@drawable/animated_neon_button" android:textStyle="bold" android:letterSpacing="0.05" />
+        </LinearLayout>
+        
+        <Button android:textColor="@color/futuristic_background" android:id="@id/btnSyncSims" android:layout_width="fill_parent" android:layout_height="60dp" android:text="🔄 SYNCHRONIZE SIMS" android:background="@drawable/animated_neon_button" android:textStyle="bold" android:letterSpacing="0.05" android:textSize="16sp" />
+    </LinearLayout>
+</LinearLayout>
+</ScrollView>

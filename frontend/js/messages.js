@@ -376,11 +376,73 @@ async function deleteMessage(messageId) {
 
 // Voir les détails d'un message
 function viewMessage(messageId) {
-    const message = messages.find(m => m.id === messageId);
-    if (message) {
-        // Implémenter l'affichage des détails dans un modal
-        console.log('Détails du message:', message);
+    const message = messages.find(m => m.id == messageId);
+    if (!message) {
+        showError('Message non trouvé');
+        return;
     }
+
+    // Remplir le modal avec les détails du message
+    document.getElementById('modalMessageId').textContent = message.id || '-';
+    document.getElementById('modalRecipient').textContent = message.recipient || '-';
+    document.getElementById('modalMessage').textContent = message.message || '-';
+    
+    // Statut avec indicateur
+    const statusIndicator = document.getElementById('modalStatusIndicator');
+    const statusText = document.getElementById('modalStatus');
+    statusIndicator.className = `status-indicator status-${message.status}`;
+    statusText.textContent = formatStatus(message.status);
+    
+    // Informations SIM
+    document.getElementById('modalSimInfo').textContent = getSimInfo(message.sim_id);
+    
+    // Dates
+    document.getElementById('modalCreatedAt').textContent = message.created_at ? 
+        new Date(message.created_at).toLocaleString('fr-FR') : '-';
+    document.getElementById('modalSentAt').textContent = message.sent_at ? 
+        new Date(message.sent_at).toLocaleString('fr-FR') : '-';
+    document.getElementById('modalDeliveredAt').textContent = message.delivered_at ? 
+        new Date(message.delivered_at).toLocaleString('fr-FR') : '-';
+    
+    // Nombre de tentatives
+    document.getElementById('modalRetryCount').textContent = message.retry_count || '0';
+    
+    // Raison de l'échec (si applicable)
+    const failureContainer = document.getElementById('modalFailureReasonContainer');
+    const failureReason = document.getElementById('modalFailureReason');
+    if (message.status === 'failed' && message.failure_reason) {
+        failureReason.textContent = message.failure_reason;
+        failureContainer.style.display = 'block';
+    } else {
+        failureContainer.style.display = 'none';
+    }
+    
+    // Bouton retry (si le message est en échec ou en attente)
+    const retryBtn = document.getElementById('modalRetryBtn');
+    if (message.status === 'pending' || message.status === 'failed') {
+        retryBtn.style.display = 'inline-block';
+        retryBtn.onclick = () => {
+            retryMessage(message.id);
+            // Fermer le modal après retry
+            const modal = bootstrap.Modal.getInstance(document.getElementById('messageDetailsModal'));
+            if (modal) modal.hide();
+        };
+    } else {
+        retryBtn.style.display = 'none';
+    }
+    
+    // Afficher le modal avec options pour corriger le backdrop
+    const modalElement = document.getElementById('messageDetailsModal');
+    const modal = new bootstrap.Modal(modalElement, {
+        backdrop: true,
+        keyboard: true,
+        focus: true
+    });
+    
+    // S'assurer que le modal est bien au premier plan
+    modalElement.style.zIndex = '1100';
+    
+    modal.show();
 }
 
 // Mise à jour du compteur de caractères
@@ -446,8 +508,12 @@ function truncateMessage(message) {
 
 // Récupération des infos SIM
 function getSimInfo(simId) {
-    const sim = sims.find(s => s.id === simId);
-    return sim ? `${sim.phone_number || 'N/A'}` : 'N/A';
+    const sim = sims.find(s => s.id == simId);
+    if (!sim) return 'N/A';
+    
+    const phoneNumber = sim.phone_number || 'N/A';
+    const carrierName = sim.carrier_name || 'N/A';
+    return `${phoneNumber} (${carrierName})`;
 }
 
 // Affichage des erreurs

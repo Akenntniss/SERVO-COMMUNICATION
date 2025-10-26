@@ -2,24 +2,7 @@ const { pool } = require('../config/database');
 
 class SmartRetrySystem {
     constructor() {
-        this.retryStrategies = {
-            // Basculement avec délai court vers autre SIM - DÉLAIS AUGMENTÉS
-            'NO_SERVICE': { switchSim: true, delay: 10000, maxRetries: 4 }, // 10s
-            'RADIO_OFF': { switchSim: true, delay: 5000, maxRetries: 4 }, // 5s  
-            'SIM_NOT_READY': { switchSim: true, delay: 15000, maxRetries: 4 }, // 15s
-            'NETWORK_TIMEOUT': { switchSim: true, delay: 20000, maxRetries: 6 }, // 20s
-            'TIMEOUT': { switchSim: true, delay: 25000, maxRetries: 8 }, // 25s - PLUS DE RETRIES
-            'OPERATOR_FAILURE': { switchSim: true, delay: 15000, maxRetries: 6 }, // 15s
-            
-            // Retry avec délai sur la même SIM - PLUS AGRESSIF  
-            'GENERIC_FAILURE': { switchSim: false, delay: 45000, maxRetries: 6 }, // 45s
-            'SEND_TIMEOUT': { switchSim: false, delay: 60000, maxRetries: 4 }, // 1min
-            
-            // Basculement après plusieurs échecs - PLUS DE RETRIES
-            'DELIVERY_FAILURE': { switchSim: true, delay: 30000, maxRetries: 8 }, // 30s
-            'RATE_LIMIT': { switchSim: true, delay: 300000, maxRetries: 4 } // 5min
-        };
-        
+        // SYSTÈME SIMPLIFIÉ: Basculement systématique vers autre SIM en cas d'échec
         this.timeoutMessages = new Map(); // Gestion des timeouts
         this.processingQueue = new Set(); // Messages en cours de traitement
     }
@@ -28,7 +11,7 @@ class SmartRetrySystem {
      * Gère l'échec d'un message et décide de la stratégie de retry
      */
     async handleFailedMessage(messageId, errorCode, phoneId = null, simId = null) {
-        console.log(`🔄 Gestion échec message ${messageId}: ${errorCode}`);
+        console.log(`🔄 DÉBUT Gestion échec message ${messageId}: ${errorCode}`);
         
         try {
             // Récupérer les informations du message
@@ -38,36 +21,51 @@ class SmartRetrySystem {
                 return false;
             }
 
-            // NOUVELLE LOGIQUE: Vérifier si la SIM a trop d'échecs récents
-            await this.checkAndDeactivateFailingSim(message.sim_id);
+            console.log(`📋 Message trouvé: ID=${message.id}, SIM=${message.sim_id}, Phone=${message.phone_id}, Retry=${message.retry_count}, Status=${message.status}`);
 
-            // LOGIQUE AMÉLIORÉE: Vérifier s'il reste des SIMs disponibles au lieu d'un nombre fixe
-            const hasAvailableSims = await this.hasAvailableSimsForRetry(message);
-            const basicMaxRetries = this.getMaxRetries(errorCode);
-            
-            if (message.retry_count >= basicMaxRetries && !hasAvailableSims) {
-                console.log(`⛔ Message ${messageId}: Plus de SIMs disponibles après ${message.retry_count} tentatives`);
-                await this.markMessageAsFinalFailure(messageId, errorCode);
-                return false;
-            } else if (message.retry_count >= basicMaxRetries * 3) {
-                // Sécurité : arrêt après 3x le max normal pour éviter les boucles infinies
+            // DÉSACTIVATION SYSTÉMATIQUE: Désactiver immédiatement la SIM défaillante (sauf si exclue du monitoring)
+            if (message.sim_id) {
+                // Vérifier si la SIM est exclue du monitoring
+                const [simInfo] = await pool.execute(
+                    'SELECT excluded_from_monitoring FROM sims WHERE id = ?',
+                    [message.sim_id]
+                );
+                
+                if (simInfo.length > 0 && simInfo[0].excluded_from_monitoring === 1) {
+                    console.log(`🛡️ SIM ${message.sim_id} exclue du monitoring - désactivation ignorée`);
+                } else {
+                    await pool.execute(
+                        'UPDATE sims SET is_active = 0, is_default = 0 WHERE id = ?',
+                        [message.sim_id]
+                    );
+                    console.log(`❌ SIM ${message.sim_id} désactivée suite à l'échec du message ${messageId} (SYSTÉMATIQUE)`);
+                    
+                    // IMMÉDIATEMENT définir une nouvelle SIM par défaut pour permettre le retry
+                    await this.setNewDefaultSimAfterFailure(message.phone_id, message.sim_id);
+                }
+            }
+
+            // SYSTÈME SIMPLIFIÉ: Toujours essayer de basculer vers une autre SIM
+            console.log(`📋 Échec détecté - Basculement automatique vers une autre SIM`);
+
+            // La nouvelle SIM par défaut a déjà été définie, pas besoin de vérifier la disponibilité
+            console.log(`✅ Nouvelle SIM par défaut définie, procédure de retry autorisée`);
+
+            // Sécurité : arrêt après 10 tentatives maximum pour éviter les boucles infinies
+            if (message.retry_count >= 10) {
                 console.log(`⛔ Message ${messageId}: Arrêt de sécurité après ${message.retry_count} tentatives`);
                 await this.markMessageAsFinalFailure(messageId, errorCode);
                 return false;
             }
 
-            // Obtenir la stratégie de retry
-            const strategy = this.getRetryStrategy(errorCode);
-            console.log(`📋 Stratégie pour ${errorCode}:`, strategy);
-
             // Incrémenter le compteur de retry
             await this.incrementRetryCount(messageId);
 
-            if (strategy.switchSim) {
-                return await this.retryWithDifferentSim(messageId, message, strategy);
-            } else {
-                return await this.retryWithDelay(messageId, strategy);
-            }
+            // TOUJOURS basculer vers une autre SIM en cas d'échec
+            console.log(`🔄 Lancement du retry avec SIM différente pour message ${messageId}`);
+            const retryResult = await this.retryWithDifferentSim(messageId, message, { switchSim: true });
+            console.log(`📋 Résultat du retry: ${retryResult ? 'SUCCÈS' : 'ÉCHEC'}`);
+            return retryResult;
 
         } catch (error) {
             console.error(`❌ Erreur lors de la gestion d'échec:`, error);
@@ -79,54 +77,33 @@ class SmartRetrySystem {
      * Retry avec basculement vers une autre SIM
      */
     async retryWithDifferentSim(messageId, message, strategy) {
-        console.log(`🔄 Basculement SIM pour message ${messageId}`);
+        console.log(`🔄 DÉBUT Basculement SIM pour message ${messageId} (SIM ${message.sim_id} déjà désactivée)`);
         
         try {
-        // Trouver une SIM alternative (maintenant avec priorisation des SIMs non testées)
-        const newSimId = await this.selectAlternativeSim(message.sim_id, message.phone_id, message);
+            // Chercher la SIM par défaut actuelle (qui a été définie dans setNewDefaultSimAfterFailure)
+            console.log(`🔍 Recherche de la SIM par défaut actuelle...`);
+            const [defaultSims] = await pool.execute(`
+                SELECT id, phone_number, carrier_name, phone_id 
+                FROM sims 
+                WHERE is_default = 1 AND is_active = 1 
+                LIMIT 1
+            `);
             
-            if (newSimId) {
-                console.log(`✅ SIM alternative trouvée: ${newSimId}`);
+            console.log(`📋 SIMs par défaut trouvées: ${defaultSims.length}`);
+            
+            if (defaultSims.length > 0) {
+                const newDefaultSim = defaultSims[0];
+                console.log(`✅ SIM par défaut trouvée: ${newDefaultSim.id} (${newDefaultSim.phone_number || 'N/A'} ${newDefaultSim.carrier_name}) - DÉJÀ ACTIVE sur téléphone ${newDefaultSim.phone_id}`);
                 
-                // 1. DÉSACTIVER la SIM défaillante
-                await pool.execute(
-                    'UPDATE sims SET is_active = 0, is_default = 0 WHERE id = ?',
-                    [message.sim_id]
-                );
-                console.log(`❌ SIM ${message.sim_id} désactivée suite à l'échec`);
-                
-                // 2. ACTIVER et définir comme DÉFAUT la nouvelle SIM
-                await pool.execute(
-                    'UPDATE sims SET is_active = 1, is_default = 1 WHERE id = ?',
-                    [newSimId]
-                );
-                console.log(`✅ SIM ${newSimId} activée et définie par défaut`);
-                
-                // 3. S'assurer qu'aucune autre SIM n'est par défaut sur ce téléphone
-                await pool.execute(
-                    'UPDATE sims SET is_default = 0 WHERE phone_id = ? AND id != ?',
-                    [message.phone_id, newSimId]
-                );
-                
-                // 4. VÉRIFIER si la nouvelle SIM est sur un téléphone différent
-                const [newSimInfo] = await pool.execute('SELECT phone_id FROM sims WHERE id = ?', [newSimId]);
-                const newPhoneId = newSimInfo[0]?.phone_id;
-                
-                let newMessageId;
-                if (newPhoneId && newPhoneId !== message.phone_id) {
-                    // SIM sur un AUTRE téléphone → utiliser createNewMessageWithPhone
-                    newMessageId = await this.createNewMessageWithPhone(message, newPhoneId, newSimId);
-                    console.log(`📝 Nouveau message ${newMessageId} créé avec SIM ${newSimId} sur AUTRE téléphone ${newPhoneId}`);
-                } else {
-                    // SIM sur le MÊME téléphone → utiliser createNewMessageWithSim
-                    newMessageId = await this.createNewMessageWithSim(message, newSimId);
-                    console.log(`📝 Nouveau message ${newMessageId} créé avec SIM ${newSimId} sur MÊME téléphone`);
-                }
+                // Créer un NOUVEAU message avec la SIM par défaut et le bon phone_id
+                console.log(`📝 Création du nouveau message...`);
+                const newMessageId = await this.createNewMessageWithCorrectPhone(message, newDefaultSim.id, newDefaultSim.phone_id);
+                console.log(`✅ SUCCÈS: Nouveau message ${newMessageId} créé avec SIM par défaut ${newDefaultSim.id} sur téléphone ${newDefaultSim.phone_id}`);
                 
                 return true;
             } else {
-                // Pas de SIM alternative, essayer sur un autre téléphone
-                console.log(`🔄 Tentative sur autre téléphone pour message ${messageId}`);
+                // Aucune SIM par défaut disponible, essayer sur un autre téléphone
+                console.log(`⚠️ Aucune SIM par défaut trouvée - Tentative sur autre téléphone pour message ${messageId}`);
                 return await this.retryWithDifferentPhone(messageId, message, strategy);
             }
             
@@ -136,18 +113,8 @@ class SmartRetrySystem {
         }
     }
 
-    /**
-     * Retry avec délai sur la même SIM
-     */
-    async retryWithDelay(messageId, strategy) {
-        console.log(`⏰ Retry avec délai ${strategy.delay}ms pour message ${messageId}`);
-        
-        setTimeout(() => {
-            this.retryMessage(messageId);
-        }, strategy.delay);
-        
-        return true;
-    }
+    // FONCTION SUPPRIMÉE: retryWithDelay
+    // Le système simplifié ne fait que basculer vers une autre SIM
 
     /**
      * Retry sur un téléphone différent
@@ -185,24 +152,14 @@ class SmartRetrySystem {
         try {
             console.log(`🔍 Recherche SIM alternative (actuelle: ${currentSimId}, téléphone: ${phoneId})`);
             
-            // LOGIQUE MODIFIÉE: PRIORISER LES TÉLÉPHONES DIFFÉRENTS POUR LES SIMs NON TESTÉES
+            // NOUVELLE LOGIQUE: D'abord essayer les SIMs non testées pour ce destinataire
             if (message && message.recipient) {
-                // D'abord chercher des SIMs non testées sur D'AUTRES téléphones
-                const untestedSimsOtherPhones = await this.getUntestedActiveSimsFromOtherPhones(message.recipient, phoneId);
-                if (untestedSimsOtherPhones.length > 0) {
-                    const selectedSim = untestedSimsOtherPhones[0];
-                    console.log(`🎯 SIM non testée AUTRE TÉLÉPHONE sélectionnée: ${selectedSim.id} (${selectedSim.phone_id} - ${selectedSim.carrier_name})`);
+                const untestedSims = await this.getUntestedActiveSims(message.recipient);
+                if (untestedSims.length > 0) {
+                    const selectedSim = untestedSims[0];
+                    console.log(`🎯 SIM non testée sélectionnée: ${selectedSim.id} (${selectedSim.carrier_name} ${selectedSim.phone_number || 'N/A'})`);
                     return selectedSim.id;
                 }
-                
-                // Ensuite chercher des SIMs non testées sur le MÊME téléphone
-                const untestedSimsSamePhone = await this.getUntestedActiveSimsFromSamePhone(message.recipient, phoneId);
-                if (untestedSimsSamePhone.length > 0) {
-                    const selectedSim = untestedSimsSamePhone[0];
-                    console.log(`🎯 SIM non testée MÊME TÉLÉPHONE sélectionnée: ${selectedSim.id} (${selectedSim.carrier_name})`);
-                    return selectedSim.id;
-                }
-                
                 console.log(`⚠️ Aucune SIM non testée disponible, utilisation logique classique`);
             }
             
@@ -333,6 +290,34 @@ class SmartRetrySystem {
     }
 
     /**
+     * Crée un nouveau message avec la SIM et le téléphone corrects
+     */
+    async createNewMessageWithCorrectPhone(originalMessage, newSimId, newPhoneId) {
+        try {
+            console.log(`📝 Création nouveau message: SIM ${newSimId} sur téléphone ${newPhoneId}`);
+            
+            const [result] = await pool.execute(`
+                INSERT INTO sms_history (
+                    phone_id, recipient, message, sim_id, status, 
+                    retry_count, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, 'pending', ?, NOW(), NOW())
+            `, [
+                newPhoneId,  // Utiliser le phone_id de la nouvelle SIM
+                originalMessage.recipient,
+                originalMessage.message,
+                newSimId,
+                (originalMessage.retry_count || 0) + 1
+            ]);
+            
+            console.log(`✅ Nouveau message ${result.insertId} créé avec SIM ${newSimId} sur téléphone ${newPhoneId}`);
+            return result.insertId;
+        } catch (error) {
+            console.error(`❌ Erreur lors de la création du nouveau message avec téléphone correct:`, error);
+            throw error;
+        }
+    }
+
+    /**
      * Crée un nouveau message avec un téléphone différent
      */
     async createNewMessageWithPhone(originalMessage, newPhoneId, newSimId) {
@@ -377,23 +362,46 @@ class SmartRetrySystem {
         }
     }
 
-    /**
-     * Obtient la stratégie de retry pour un code d'erreur
-     */
-    getRetryStrategy(errorCode) {
-        return this.retryStrategies[errorCode] || {
-            switchSim: false,
-            delay: 60000, // 1 minute par défaut
-            maxRetries: 2
-        };
-    }
+    // FONCTIONS SUPPRIMÉES: getRetryStrategy et getMaxRetries
+    // Le système simplifié n'utilise plus de stratégies complexes
 
     /**
-     * Obtient le nombre max de retries pour un code d'erreur
+     * Définit immédiatement une nouvelle SIM par défaut après une défaillance
+     * Cherche parmi TOUTES les SIMs déjà actives, peu importe le téléphone
      */
-    getMaxRetries(errorCode) {
-        const strategy = this.getRetryStrategy(errorCode);
-        return strategy.maxRetries;
+    async setNewDefaultSimAfterFailure(phoneId, failedSimId) {
+        try {
+            console.log(`🔄 Recherche d'une SIM DÉJÀ ACTIVE pour remplacer SIM ${failedSimId} comme par défaut`);
+            
+            // D'abord, retirer le statut par défaut de toutes les SIMs
+            await pool.execute('UPDATE sims SET is_default = 0');
+            
+            // Chercher n'importe quelle SIM DÉJÀ ACTIVE (peu importe le téléphone)
+            const [activeSims] = await pool.execute(`
+                SELECT id, phone_number, carrier_name, phone_id 
+                FROM sims 
+                WHERE id != ? AND is_active = 1 
+                ORDER BY id ASC 
+                LIMIT 1
+            `, [failedSimId]);
+            
+            if (activeSims.length > 0) {
+                const newDefaultSim = activeSims[0];
+                await pool.execute(
+                    'UPDATE sims SET is_default = 1 WHERE id = ?',
+                    [newDefaultSim.id]
+                );
+                console.log(`✅ Nouvelle SIM par défaut: ${newDefaultSim.id} (${newDefaultSim.phone_number || 'N/A'} ${newDefaultSim.carrier_name}) - DÉJÀ ACTIVE sur téléphone ${newDefaultSim.phone_id}`);
+                return newDefaultSim.id;
+            }
+            
+            console.log(`⚠️ Aucune SIM déjà active trouvée pour remplacer SIM ${failedSimId}`);
+            return null;
+            
+        } catch (error) {
+            console.error(`❌ Erreur lors de la définition nouvelle SIM par défaut:`, error);
+            return null;
+        }
     }
 
     /**
@@ -490,12 +498,23 @@ class SmartRetrySystem {
      * Démarre le système de monitoring des timeouts
      */
     startTimeoutMonitoring() {
-        console.log(`🕐 Démarrage du monitoring des timeouts`);
+        console.log(`🕐 Démarrage du monitoring des timeouts (vérification toutes les 2 minutes)`);
+        console.log(`🔍 Surveillance renforcée des SIMs défaillantes (vérification toutes les 2 minutes)`);
         
-        // Vérifier les messages en timeout toutes les 30 secondes
+        // Surveillance des messages timeout (toutes les 2 minutes)
         setInterval(() => {
             this.checkTimeoutMessages();
-        }, 30000);
+        }, 120000); // 2 minutes
+        
+        // SURVEILLANCE RENFORCÉE: Vérification des SIMs défaillantes (toutes les 2 minutes)
+        setInterval(() => {
+            this.checkFailedMessagesForSimDeactivation();
+        }, 120000); // 2 minutes
+        
+        // Vérification périodique des SIMs par défaut multiples (toutes les heures)
+        setInterval(() => {
+            this.checkAndFixMultipleDefaults();
+        }, 3600000); // 1 heure
     }
 
     /**
@@ -503,16 +522,22 @@ class SmartRetrySystem {
      */
     async checkTimeoutMessages() {
         try {
+            // CORRECTION: Traiter TOUS les messages en pending depuis plus d'1 minute
+            // Sans limite de retry_count pour capturer les messages de retry
             const [timeoutMessages] = await pool.query(`
-                SELECT id, phone_id, sim_id, recipient, retry_count
+                SELECT id, phone_id, sim_id, recipient, retry_count, created_at
                 FROM sms_history 
                 WHERE status = 'pending' 
-                AND created_at < DATE_SUB(NOW(), INTERVAL 3 MINUTE)
-                AND retry_count < 3
+                AND created_at < DATE_SUB(NOW(), INTERVAL 1 MINUTE)
+                ORDER BY created_at ASC
             `);
 
+            console.log(`🕐 Vérification timeout: ${timeoutMessages.length} messages en attente détectés`);
+
             for (const message of timeoutMessages) {
-                console.log(`⏰ Timeout détecté pour message ${message.id}`);
+                console.log(`⏰ Timeout détecté pour message ${message.id} (retry_count: ${message.retry_count}, créé: ${message.created_at})`);
+                
+                // Traiter le timeout - cela va désactiver la SIM et créer un nouveau message si possible
                 await this.handleFailedMessage(message.id, 'TIMEOUT', message.phone_id, message.sim_id);
             }
             
@@ -521,125 +546,11 @@ class SmartRetrySystem {
         }
     }
 
-    /**
-     * Vérifie si une SIM a trop d'échecs récents et la désactive si nécessaire
-     */
-    async checkAndDeactivateFailingSim(simId) {
-        if (!simId) return;
+    // FONCTION SUPPRIMÉE: checkAndDeactivateFailingSim
+    // Le système de seuils a été désactivé - désormais désactivation systématique à chaque échec
 
-        try {
-            // Compter les échecs des 30 dernières minutes pour cette SIM
-            const [recentFailures] = await pool.query(`
-                SELECT COUNT(*) as failure_count
-                FROM sms_history 
-                WHERE sim_id = ? 
-                AND status = 'failed' 
-                AND created_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE)
-            `, [simId]);
-
-            // Compter le total des messages des 30 dernières minutes
-            const [totalMessages] = await pool.query(`
-                SELECT COUNT(*) as total_count
-                FROM sms_history 
-                WHERE sim_id = ? 
-                AND created_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE)
-            `, [simId]);
-
-            const failureCount = recentFailures[0]?.failure_count || 0;
-            const totalCount = totalMessages[0]?.total_count || 0;
-            const failureRate = totalCount > 0 ? (failureCount / totalCount) * 100 : 0;
-
-            console.log(`📊 SIM ${simId}: ${failureCount} échecs sur ${totalCount} messages (${failureRate.toFixed(1)}%)`);
-
-            // Seuils de désactivation - BEAUCOUP MOINS AGRESSIFS POUR LES TESTS
-            const FAILURE_THRESHOLD = 15; // 15 échecs minimum (au lieu de 3)
-            const FAILURE_RATE_THRESHOLD = 90; // 90% de taux d'échec (au lieu de 70%)
-
-            if (failureCount >= FAILURE_THRESHOLD && failureRate >= FAILURE_RATE_THRESHOLD) {
-                console.log(`🚨 SIM ${simId} défaillante: ${failureCount} échecs (${failureRate.toFixed(1)}%) - DÉSACTIVATION`);
-                
-                // Récupérer les infos de la SIM avant désactivation
-                const [simInfo] = await pool.query(`
-                    SELECT carrier_name, phone_number, phone_id, is_default
-                    FROM sims WHERE id = ?
-                `, [simId]);
-
-                const sim = simInfo[0];
-                if (sim) {
-                    // Désactiver la SIM
-                    await pool.execute(`
-                        UPDATE sims 
-                        SET is_active = 0, is_default = 0, updated_at = NOW()
-                        WHERE id = ?
-                    `, [simId]);
-
-                    console.log(`❌ SIM ${simId} (${sim.carrier_name} ${sim.phone_number || 'N/A'}) désactivée automatiquement`);
-
-                    // Si c'était la SIM par défaut, activer une autre SIM disponible
-                    if (sim.is_default) {
-                        await this.activateAlternativeDefaultSim(sim.phone_id, simId);
-                    }
-
-                    // Enregistrer l'événement de désactivation
-                    await this.logSimDeactivation(simId, failureCount, failureRate);
-                }
-            }
-
-        } catch (error) {
-            console.error(`❌ Erreur lors de la vérification de la SIM ${simId}:`, error);
-        }
-    }
-
-    /**
-     * Active une SIM alternative comme SIM par défaut
-     */
-    async activateAlternativeDefaultSim(phoneId, deactivatedSimId) {
-        try {
-            // Chercher une SIM active alternative sur le même téléphone
-            const [alternativeSims] = await pool.query(`
-                SELECT id, carrier_name, phone_number
-                FROM sims 
-                WHERE phone_id = ? AND id != ? AND is_active = 1
-                ORDER BY RAND()
-                LIMIT 1
-            `, [phoneId, deactivatedSimId]);
-
-            if (alternativeSims.length > 0) {
-                const altSim = alternativeSims[0];
-                await pool.execute(`
-                    UPDATE sims 
-                    SET is_default = 1, updated_at = NOW()
-                    WHERE id = ?
-                `, [altSim.id]);
-                
-                console.log(`✅ SIM ${altSim.id} (${altSim.carrier_name} ${altSim.phone_number || 'N/A'}) définie comme nouvelle SIM par défaut`);
-            } else {
-                console.log(`⚠️ Aucune SIM alternative trouvée sur le téléphone ${phoneId}`);
-            }
-
-        } catch (error) {
-            console.error(`❌ Erreur lors de l'activation SIM alternative:`, error);
-        }
-    }
-
-    /**
-     * Enregistre l'événement de désactivation d'une SIM
-     */
-    async logSimDeactivation(simId, failureCount, failureRate) {
-        try {
-            // Ici on pourrait enregistrer dans une table de logs ou envoyer une notification
-            console.log(`📝 Événement enregistré: SIM ${simId} désactivée - ${failureCount} échecs (${failureRate.toFixed(1)}%)`);
-            
-            // TODO: Implémenter une table de logs si nécessaire
-            // await pool.execute(`
-            //     INSERT INTO sim_deactivation_log (sim_id, failure_count, failure_rate, created_at)
-            //     VALUES (?, ?, ?, NOW())
-            // `, [simId, failureCount, failureRate]);
-
-        } catch (error) {
-            console.error(`❌ Erreur lors de l'enregistrement de l'événement:`, error);
-        }
-    }
+    // FONCTIONS SUPPRIMÉES: activateAlternativeDefaultSim et logSimDeactivation
+    // Ces fonctions étaient liées au système de seuils qui a été désactivé
 
     /**
      * Vérifie s'il reste des SIMs disponibles pour retry
@@ -709,68 +620,221 @@ class SmartRetrySystem {
     }
 
     /**
-     * Obtient les SIMs actives non testées sur D'AUTRES téléphones (PRIORITÉ)
+     * SURVEILLANCE RENFORCÉE: Vérifie et désactive les SIMs défaillantes
      */
-    async getUntestedActiveSimsFromOtherPhones(recipient, currentPhoneId) {
+    async checkFailedMessagesForSimDeactivation() {
+        console.log(`🔍 Surveillance périodique des SIMs défaillantes (toutes les 2 min)...`);
+        
         try {
-            const [untestedSims] = await pool.query(`
-                SELECT s.id, s.carrier_name, s.phone_number, s.phone_id
-                FROM sims s
-                JOIN phones p ON s.phone_id = p.id
-                WHERE s.is_active = 1 
-                AND p.status = 'active'
-                AND s.phone_id != ?
-                AND s.id NOT IN (
-                    SELECT DISTINCT sim_id 
-                    FROM sms_history 
-                    WHERE recipient = ? 
-                    AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)
-                    AND status IN ('failed', 'pending')
-                    AND sim_id IS NOT NULL
-                )
-                ORDER BY RAND()
-                LIMIT 1
-            `, [currentPhoneId, recipient]);
+            // SURVEILLANCE RENFORCÉE: Chercher les messages 'failed' récents avec des critères plus larges
+            const [failedMessages] = await pool.query(`
+                SELECT DISTINCT h.sim_id, MAX(h.id) as latest_message_id, MAX(h.created_at) as latest_failure, 
+                       s.phone_number, s.carrier_name, s.phone_id, COUNT(h.id) as failure_count,
+                       MIN(h.created_at) as first_failure
+                FROM sms_history h
+                JOIN sims s ON h.sim_id = s.id
+                WHERE h.status = 'failed' 
+                AND h.created_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE)  -- Élargi à 30 minutes
+                AND s.is_active = 1
+                GROUP BY h.sim_id, s.phone_number, s.carrier_name, s.phone_id
+                ORDER BY failure_count DESC, latest_failure DESC
+            `);
 
-            console.log(`🔍 ${untestedSims.length} SIMs non testées trouvées sur AUTRES téléphones pour ${recipient}`);
-            return untestedSims;
+            // SURVEILLANCE SUPPLÉMENTAIRE: Chercher les messages 'pending' trop anciens (probablement échoués)
+            const [stuckMessages] = await pool.query(`
+                SELECT DISTINCT h.sim_id, MAX(h.id) as latest_message_id, MAX(h.created_at) as latest_stuck, 
+                       s.phone_number, s.carrier_name, s.phone_id, COUNT(h.id) as stuck_count
+                FROM sms_history h
+                JOIN sims s ON h.sim_id = s.id
+                WHERE h.status = 'pending' 
+                AND h.created_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE)  -- Messages bloqués depuis 5+ minutes
+                AND s.is_active = 1
+                GROUP BY h.sim_id, s.phone_number, s.carrier_name, s.phone_id
+                HAVING stuck_count >= 2  -- Au moins 2 messages bloqués
+                ORDER BY stuck_count DESC, latest_stuck DESC
+            `);
 
+            const totalProblematicSims = failedMessages.length + stuckMessages.length;
+            
+            if (totalProblematicSims > 0) {
+                console.log(`🚨 ${totalProblematicSims} SIM(s) problématique(s) détectée(s):`);
+                
+                // Traiter les SIMs avec des échecs explicites
+                for (const msg of failedMessages) {
+                    console.log(`   - SIM ${msg.sim_id} (${msg.phone_number || 'N/A'} ${msg.carrier_name} sur ${msg.phone_id}): ${msg.failure_count} échec(s) explicite(s)`);
+                    
+                    // Vérifier si la SIM est exclue du monitoring avant de la désactiver
+                    const [simInfo] = await pool.execute(
+                        'SELECT excluded_from_monitoring FROM sims WHERE id = ?',
+                        [msg.sim_id]
+                    );
+                    
+                    if (simInfo.length > 0 && simInfo[0].excluded_from_monitoring === 1) {
+                        console.log(`🛡️ SIM ${msg.sim_id} exclue du monitoring - désactivation automatique ignorée`);
+                    } else {
+                        // Désactiver immédiatement cette SIM
+                        await pool.execute(
+                            'UPDATE sims SET is_active = 0, is_default = 0 WHERE id = ?',
+                            [msg.sim_id]
+                        );
+                        
+                        console.log(`❌ SIM ${msg.sim_id} désactivée automatiquement (échecs explicites)`);
+                    }
+                    
+                    // Marquer les messages pending de cette SIM comme failed
+                    await pool.execute(`
+                        UPDATE sms_history 
+                        SET status = 'failed', failure_reason = 'SIM_AUTO_DEACTIVATED' 
+                        WHERE sim_id = ? AND status = 'pending'
+                    `, [msg.sim_id]);
+                }
+                
+                // Traiter les SIMs avec des messages bloqués
+                for (const msg of stuckMessages) {
+                    console.log(`   - SIM ${msg.sim_id} (${msg.phone_number || 'N/A'} ${msg.carrier_name} sur ${msg.phone_id}): ${msg.stuck_count} message(s) bloqué(s)`);
+                    
+                    // Vérifier si la SIM est exclue du monitoring avant de la désactiver
+                    const [simInfo] = await pool.execute(
+                        'SELECT excluded_from_monitoring FROM sims WHERE id = ?',
+                        [msg.sim_id]
+                    );
+                    
+                    if (simInfo.length > 0 && simInfo[0].excluded_from_monitoring === 1) {
+                        console.log(`🛡️ SIM ${msg.sim_id} exclue du monitoring - désactivation automatique ignorée (messages bloqués)`);
+                    } else {
+                        // Désactiver cette SIM aussi
+                        await pool.execute(
+                            'UPDATE sims SET is_active = 0, is_default = 0 WHERE id = ?',
+                            [msg.sim_id]
+                        );
+                        
+                        console.log(`❌ SIM ${msg.sim_id} désactivée automatiquement (messages bloqués)`);
+                    }
+                    
+                    // Marquer les messages pending de cette SIM comme failed
+                    await pool.execute(`
+                        UPDATE sms_history 
+                        SET status = 'failed', failure_reason = 'SIM_STUCK_MESSAGES' 
+                        WHERE sim_id = ? AND status = 'pending'
+                    `, [msg.sim_id]);
+                }
+                
+                // S'assurer qu'il reste au moins une SIM active
+                await this.ensureAtLeastOneActiveSim();
+                
+            } else {
+                console.log(`✅ Aucune SIM problématique détectée`);
+            }
+            
         } catch (error) {
-            console.error(`❌ Erreur lors de la récupération des SIMs d'autres téléphones:`, error);
-            return [];
+            console.error(`❌ Erreur lors de la surveillance des SIMs défaillantes:`, error);
         }
     }
-
+    
     /**
-     * Obtient les SIMs actives non testées sur le MÊME téléphone (en dernier recours)
+     * S'assure qu'il reste au moins une SIM active dans le système
      */
-    async getUntestedActiveSimsFromSamePhone(recipient, currentPhoneId) {
+    async ensureAtLeastOneActiveSim() {
         try {
-            const [untestedSims] = await pool.query(`
-                SELECT s.id, s.carrier_name, s.phone_number, s.phone_id
-                FROM sims s
-                JOIN phones p ON s.phone_id = p.id
-                WHERE s.is_active = 1 
-                AND p.status = 'active'
-                AND s.phone_id = ?
-                AND s.id NOT IN (
-                    SELECT DISTINCT sim_id 
-                    FROM sms_history 
-                    WHERE recipient = ? 
-                    AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)
-                    AND status IN ('failed', 'pending')
-                    AND sim_id IS NOT NULL
-                )
-                ORDER BY RAND()
-                LIMIT 1
-            `, [currentPhoneId, recipient]);
-
-            console.log(`🔍 ${untestedSims.length} SIMs non testées trouvées sur MÊME téléphone ${currentPhoneId} pour ${recipient}`);
-            return untestedSims;
-
+            // Vérifier s'il reste des SIMs actives
+            const [activeSims] = await pool.query('SELECT COUNT(*) as count FROM sims WHERE is_active = 1');
+            
+            if (activeSims[0].count === 0) {
+                console.warn(`⚠️ ALERTE: Aucune SIM active restante! Réactivation d'urgence...`);
+                
+                // Réactiver la SIM la plus récemment utilisée avec succès
+                const [lastSuccessfulSim] = await pool.query(`
+                    SELECT s.id, s.phone_number, s.carrier_name 
+                    FROM sims s
+                    JOIN sms_history h ON s.id = h.sim_id
+                    WHERE h.status IN ('sent', 'delivered')
+                    ORDER BY h.created_at DESC
+                    LIMIT 1
+                `);
+                
+                if (lastSuccessfulSim.length > 0) {
+                    const simToReactivate = lastSuccessfulSim[0];
+                    await pool.execute(
+                        'UPDATE sims SET is_active = 1, is_default = 1 WHERE id = ?',
+                        [simToReactivate.id]
+                    );
+                    console.log(`🔄 SIM ${simToReactivate.id} (${simToReactivate.phone_number}) réactivée d'urgence`);
+                } else {
+                    // En dernier recours, réactiver la première SIM disponible
+                    const [firstSim] = await pool.query('SELECT id, phone_number, carrier_name FROM sims ORDER BY id LIMIT 1');
+                    if (firstSim.length > 0) {
+                        await pool.execute(
+                            'UPDATE sims SET is_active = 1, is_default = 1 WHERE id = ?',
+                            [firstSim[0].id]
+                        );
+                        console.log(`🔄 SIM ${firstSim[0].id} (${firstSim[0].phone_number}) réactivée par défaut`);
+                    }
+                }
+            }
         } catch (error) {
-            console.error(`❌ Erreur lors de la récupération des SIMs du même téléphone:`, error);
-            return [];
+            console.error(`❌ Erreur lors de la vérification des SIMs actives:`, error);
+        }
+    }
+    
+    /**
+     * Vérifie et corrige les SIMs par défaut multiples
+     */
+    async checkAndFixMultipleDefaults() {
+        try {
+            console.log(`🔍 Vérification des SIMs par défaut multiples...`);
+            
+            // Chercher les SIMs par défaut multiples
+            const [defaultSims] = await pool.query(`
+                SELECT id, phone_number, carrier_name, phone_id 
+                FROM sims 
+                WHERE is_default = 1 
+                ORDER BY id
+            `);
+            
+            if (defaultSims.length > 1) {
+                console.warn(`⚠️ ${defaultSims.length} SIMs par défaut détectées! Correction en cours...`);
+                
+                // Garder seulement la première SIM par défaut active
+                const simToKeep = defaultSims.find(sim => sim.is_active) || defaultSims[0];
+                
+                // Désactiver toutes les autres SIMs par défaut
+                for (const sim of defaultSims) {
+                    if (sim.id !== simToKeep.id) {
+                        await pool.execute(
+                            'UPDATE sims SET is_default = 0 WHERE id = ?',
+                            [sim.id]
+                        );
+                        console.log(`🔧 SIM ${sim.id} (${sim.phone_number}) n'est plus par défaut`);
+                    }
+                }
+                
+                console.log(`✅ SIM ${simToKeep.id} (${simToKeep.phone_number}) reste la seule par défaut`);
+                
+            } else if (defaultSims.length === 1) {
+                console.log(`✅ Une seule SIM par défaut: ${defaultSims[0].phone_number}`);
+            } else {
+                console.warn(`⚠️ Aucune SIM par défaut! Définition automatique...`);
+                
+                // Définir une SIM active comme par défaut
+                const [activeSims] = await pool.query(`
+                    SELECT id, phone_number, carrier_name 
+                    FROM sims 
+                    WHERE is_active = 1 
+                    ORDER BY id 
+                    LIMIT 1
+                `);
+                
+                if (activeSims.length > 0) {
+                    await pool.execute(
+                        'UPDATE sims SET is_default = 1 WHERE id = ?',
+                        [activeSims[0].id]
+                    );
+                    console.log(`🔧 SIM ${activeSims[0].id} (${activeSims[0].phone_number}) définie comme par défaut`);
+                }
+            }
+            
+        } catch (error) {
+            console.error(`❌ Erreur lors de la vérification des SIMs par défaut:`, error);
         }
     }
 }

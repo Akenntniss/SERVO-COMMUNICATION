@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="#fff0f0f0" android:padding="16.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="8.0dip"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="18.0sp" android:textStyle="bold" android:id="@id/tvSimName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SIM 1" />
+    <TextView android:textSize="14.0sp" android:id="@id/tvCarrierName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="Orange" />
+    <TextView android:textSize="14.0sp" android:id="@id/tvPhoneNumber" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="+33 6 12 34 56 78" />
+    <TextView android:textSize="12.0sp" android:id="@id/tvSimStatusText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="Active" />
+</LinearLayout>

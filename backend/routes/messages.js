@@ -3,9 +3,13 @@ const router = express.Router();
 const { pool } = require('../config/database');
 const { updateRecipientCounter } = require('../utils/recipient-counter');
 const SmartRetrySystem = require('../services/smart-retry-system');
+const MessageDelayService = require('../services/message-delay-service');
 
 // Instance du système de retry
 const retrySystem = new SmartRetrySystem();
+
+// Instance du service de délai entre messages (30 secondes)
+const delayService = new MessageDelayService();
 
 // POST /api/messages/send - Envoyer un SMS
 router.post('/send', async (req, res) => {
@@ -382,6 +386,17 @@ router.put('/:id/status', async (req, res) => {
       WHERE id = ?
     `, updateValues);
     
+    // Si le message a été envoyé avec succès, enregistrer le délai
+    if (status === 'sent' && sim_id) {
+      try {
+        await delayService.recordSuccessfulSend(sim_id, id);
+        console.log(`🕐 Délai de 30s enregistré pour SIM ${sim_id}, message ${id}`);
+      } catch (error) {
+        console.error(`❌ Erreur lors de l'enregistrement du délai pour SIM ${sim_id}:`, error);
+        // Ne pas faire échouer la mise à jour du statut pour cette erreur
+      }
+    }
+    
     // Si le message a échoué, déclencher le système de retry intelligent
     if (status === 'failed') {
       // Si pas de failure_reason spécifique, utiliser un code générique pour les problèmes opérateur
@@ -397,6 +412,7 @@ router.put('/:id/status', async (req, res) => {
         }
       });
     }
+    
     
     res.json({
       success: true,
@@ -567,16 +583,22 @@ router.get('/pending/:phone_id', async (req, res) => {
       [phone_id, 'pending']
     );
     
-    console.log('📨 Messages trouvés:', messages.length);
+    console.log('📨 Messages trouvés avant filtrage délai:', messages.length);
     
-    // Debug: Afficher les détails de chaque message
-    messages.forEach(msg => {
-      console.log(`📋 Message ${msg.id}: sim_id=${msg.sim_id}, slot_index=${msg.slot_index}, subscription_id=${msg.subscription_id}, carrier=${msg.carrier_name}`);
+    // Appliquer le filtrage avec délai de 30 secondes
+    const authorizedMessages = await delayService.filterMessagesWithDelay(messages);
+    
+    console.log(`🕐 Filtrage délai appliqué: ${messages.length} -> ${authorizedMessages.length} messages autorisés`);
+    
+    // Debug: Afficher les détails de chaque message autorisé
+    authorizedMessages.forEach(msg => {
+      const delayInfo = msg.delay_info ? ` (${msg.delay_info.reason})` : '';
+      console.log(`📋 Message ${msg.id}: sim_id=${msg.sim_id}, slot_index=${msg.slot_index}, subscription_id=${msg.subscription_id}, carrier=${msg.carrier_name}${delayInfo}`);
     });
     
     res.json({
       success: true,
-      data: messages
+      data: authorizedMessages
     });
     
   } catch (error) {
@@ -586,6 +608,128 @@ router.get('/pending/:phone_id', async (req, res) => {
       success: false,
       message: 'Erreur serveur',
       error: error.message
+    });
+  }
+});
+
+// GET /api/messages/delay-stats - Statistiques des délais entre messages
+router.get('/delay-stats', async (req, res) => {
+  try {
+    console.log('📊 Récupération des statistiques de délai...');
+    
+    const delayStats = await delayService.getDelayStats();
+    
+    res.json({
+      success: true,
+      message: 'Statistiques de délai récupérées',
+      data: {
+        delay_seconds: 30,
+        ...delayStats
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur lors de la récupération des stats de délai:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération des statistiques de délai',
+      error: error.message
+    });
+  }
+});
+
+// ROUTE DE TEST - Forcer l'échec d'un message pour tester la désactivation
+router.post('/test-failure/:messageId', async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const { simId } = req.body;
+    
+    console.log(`🧪 TEST: Forcer l'échec du message ${messageId} avec SIM ${simId}`);
+    
+    // Déclencher directement le système de retry
+    const result = await retrySystem.handleFailedMessage(messageId, 'TEST_FAILURE', null, simId);
+    
+    res.json({
+      success: true,
+      message: 'Test d\'échec déclenché',
+      result: result
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur lors du test d\'échec:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors du test'
+    });
+  }
+});
+
+// ROUTE DE TEST - Forcer la désactivation d'une SIM
+router.post('/test-deactivate-sim/:simId', async (req, res) => {
+  try {
+    const { simId } = req.params;
+    
+    console.log(`🧪 TEST: Forcer la désactivation de la SIM ${simId}`);
+    
+    // Désactiver directement la SIM
+    await pool.execute(
+      'UPDATE sims SET is_active = 0, is_default = 0 WHERE id = ?',
+      [simId]
+    );
+    
+    console.log(`❌ SIM ${simId} désactivée par test manuel`);
+    
+    res.json({
+      success: true,
+      message: `SIM ${simId} désactivée avec succès`
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur lors de la désactivation test:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la désactivation'
+    });
+  }
+});
+
+// ROUTE DE TEST - Vérifier et forcer les timeouts
+router.post('/test-check-timeouts', async (req, res) => {
+  try {
+    console.log(`🧪 TEST: Vérification manuelle des timeouts`);
+    
+    // Récupérer les messages en pending depuis plus de 1 minute (au lieu de 3 pour le test)
+    const [timeoutMessages] = await pool.query(`
+      SELECT id, phone_id, sim_id, recipient, created_at, retry_count
+      FROM sms_history 
+      WHERE status = 'pending' 
+      AND created_at < DATE_SUB(NOW(), INTERVAL 1 MINUTE)
+    `);
+    
+    console.log(`🕐 ${timeoutMessages.length} messages en timeout détectés`);
+    
+    let processedCount = 0;
+    for (const message of timeoutMessages) {
+      console.log(`⏰ Traitement timeout pour message ${message.id}`);
+      try {
+        await retrySystem.handleFailedMessage(message.id, 'MANUAL_TIMEOUT', message.phone_id, message.sim_id);
+        processedCount++;
+      } catch (error) {
+        console.error(`❌ Erreur traitement message ${message.id}:`, error);
+      }
+    }
+    
+    res.json({
+      success: true,
+      message: `${processedCount} messages en timeout traités`,
+      timeoutMessages: timeoutMessages.length
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur lors de la vérification des timeouts:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la vérification'
     });
   }
 });

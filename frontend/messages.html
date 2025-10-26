@@ -171,7 +171,7 @@
                         <div class="mb-3">
                             <label class="form-label">Message</label>
                             <textarea class="form-control cyber-input" name="message" rows="4" required></textarea>
-                            <small class="text-secondary" id="charCount">0/160 caractères</small>
+                            <small class="text-secondary" id="charCount">0 caractères</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">SIM (optionnel)</label>
@@ -206,7 +206,7 @@
                         <div class="mb-3">
                             <label class="form-label">Message</label>
                             <textarea class="form-control cyber-input" name="message" rows="4" required></textarea>
-                            <small class="text-secondary" id="bulkCharCount">0/160 caractères</small>
+                            <small class="text-secondary" id="bulkCharCount">0 caractères</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">SIM (optionnel)</label>
@@ -219,6 +219,97 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-cyber" data-bs-dismiss="modal">Annuler</button>
                     <button type="button" class="btn btn-cyber" id="sendBulkBtn">Envoyer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Détails du Message -->
+    <div class="modal fade" id="messageDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content cyber-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title neon-text">Détails du Message</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-info">ID du Message</label>
+                                <div class="cyber-card p-2">
+                                    <span id="modalMessageId">-</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-info">Destinataire</label>
+                                <div class="cyber-card p-2">
+                                    <span id="modalRecipient">-</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-info">Statut</label>
+                                <div class="cyber-card p-2">
+                                    <span class="status-indicator" id="modalStatusIndicator"></span>
+                                    <span id="modalStatus">-</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-info">SIM Utilisée</label>
+                                <div class="cyber-card p-2">
+                                    <span id="modalSimInfo">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-info">Date de Création</label>
+                                <div class="cyber-card p-2">
+                                    <span id="modalCreatedAt">-</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-info">Date d'Envoi</label>
+                                <div class="cyber-card p-2">
+                                    <span id="modalSentAt">-</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-info">Date de Livraison</label>
+                                <div class="cyber-card p-2">
+                                    <span id="modalDeliveredAt">-</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-info">Tentatives</label>
+                                <div class="cyber-card p-2">
+                                    <span id="modalRetryCount">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="form-label text-info">Message Complet</label>
+                                <div class="cyber-card p-3">
+                                    <pre id="modalMessage" style="white-space: pre-wrap; margin: 0; color: #FFFFFF;">-</pre>
+                                </div>
+                            </div>
+                            <div class="mb-3" id="modalFailureReasonContainer" style="display: none;">
+                                <label class="form-label text-danger">Raison de l'Échec</label>
+                                <div class="cyber-card p-2 border-danger">
+                                    <span id="modalFailureReason">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cyber" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-cyber" id="modalRetryBtn" style="display: none;">
+                        <i class="fas fa-redo"></i> Réessayer
+                    </button>
                 </div>
             </div>
         </div>

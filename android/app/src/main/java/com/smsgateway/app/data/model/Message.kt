@@ -12,10 +12,6 @@ data class Message(
     val phoneId: String,
     @SerializedName("sim_id")
     val simId: String?,
-    @SerializedName("slot_index")
-    val slotIndex: Int? = null,
-    @SerializedName("subscription_id")
-    val subscriptionId: Int? = null,
     val recipient: String,
     val content: String,
     val status: String = "pending", // pending, sent, failed, delivered

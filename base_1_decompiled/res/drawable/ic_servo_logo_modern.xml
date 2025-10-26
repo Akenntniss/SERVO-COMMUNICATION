@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Background Circle -->
+    <path
+        android:fillColor="@color/futuristic_background"
+        android:pathData="M54,54m-54,0a54,54 0,1 1,108 0a54,54 0,1 1,-108 0" />
+    
+    <!-- Outer Ring -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/neon_cyan"
+        android:strokeWidth="3"
+        android:pathData="M54,54m-45,0a45,45 0,1 1,90 0a45,45 0,1 1,-90 0" />
+    
+    <!-- Inner Hexagon -->
+    <path
+        android:fillColor="@color/neon_blue"
+        android:pathData="M54,20 L74,35 L74,65 L54,80 L34,65 L34,35 Z" />
+    
+    <!-- Central S -->
+    <path
+        android:fillColor="@color/futuristic_background"
+        android:pathData="M45,35 Q50,30 55,35 Q60,40 55,45 Q50,50 45,45 Q40,40 45,35 Z
+                         M49,50 Q54,55 59,50 Q64,45 59,40 Q54,35 49,40 Q44,45 49,50 Z" />
+    
+    <!-- Communication Waves -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/neon_green"
+        android:strokeWidth="2"
+        android:pathData="M25,40 Q35,35 45,40 Q55,45 65,40 Q75,35 85,40" />
+    
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/neon_green"
+        android:strokeWidth="2"
+        android:pathData="M25,50 Q35,45 45,50 Q55,55 65,50 Q75,45 85,50" />
+    
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/neon_green"
+        android:strokeWidth="2"
+        android:pathData="M25,60 Q35,55 45,60 Q55,65 65,60 Q75,55 85,60" />
+    
+    <!-- Corner Accents -->
+    <path
+        android:fillColor="@color/neon_purple"
+        android:pathData="M15,15 L25,15 L20,25 Z" />
+    
+    <path
+        android:fillColor="@color/neon_purple"
+        android:pathData="M83,15 L93,15 L88,25 Z" />
+    
+    <path
+        android:fillColor="@color/neon_purple"
+        android:pathData="M15,83 L25,93 L15,93 Z" />
+    
+    <path
+        android:fillColor="@color/neon_purple"
+        android:pathData="M83,83 L93,93 L83,93 Z" />
+</vector>

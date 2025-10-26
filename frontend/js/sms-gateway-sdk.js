@@ -40,7 +40,7 @@ class SMSGateway {
         
         const data = {
             recipient: this.formatPhoneNumber(recipient),
-            message: message.substring(0, 160), // Limite à 160 caractères
+            message: message, // Pas de limite de caractères
             priority: options.priority || 'normal',
             ...options
         };
@@ -283,9 +283,7 @@ class SMSGateway {
             result.errors.push('Le message ne peut pas être vide');
         }
 
-        if (message.length > 160) {
-            result.warnings.push(`Message tronqué à 160 caractères (${message.length} caractères)`);
-        }
+        // Limite de 160 caractères supprimée - messages longs autorisés
 
         // Détection de caractères spéciaux qui peuvent causer des problèmes
         const specialChars = /[^\x00-\x7F]/g;

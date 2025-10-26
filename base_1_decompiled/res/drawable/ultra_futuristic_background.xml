@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base gradient -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:centerX="0.5"
+                android:centerY="0.3"
+                android:gradientRadius="800dp"
+                android:startColor="#ff0a0a1f"
+                android:centerColor="#ff1a0a2e"
+                android:endColor="#ff0a0a0f" />
+        </shape>
+    </item>
+    
+    <!-- Grid pattern overlay -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="0"
+                android:startColor="@android:color/transparent"
+                android:centerColor="#1100f5ff"
+                android:endColor="@android:color/transparent" />
+        </shape>
+    </item>
+    
+    <!-- Vertical lines -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="90"
+                android:startColor="@android:color/transparent"
+                android:centerColor="#0800f5ff"
+                android:endColor="@android:color/transparent" />
+        </shape>
+    </item>
+</layer-list>

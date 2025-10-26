@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SERVO COMMUNICATION</string>
+    <string name="app_name">SMS Gateway</string>
     
     <!-- Configuration générale -->
-    <string name="setup_title">Configuration SERVO COMMUNICATION</string>
+    <string name="setup_title">Configuration SMS Gateway</string>
     <string name="setup_step_1">Étape 1: Connexion au serveur</string>
     <string name="setup_step_2">Étape 2: Permissions</string>
     <string name="setup_step_3">Étape 3: Cartes SIM</string>
@@ -19,7 +19,7 @@
     
     <!-- Configuration serveur -->
     <string name="server_config_title">Configuration du serveur</string>
-    <string name="server_config_description">Entrez l\'URL du serveur SERVO COMMUNICATION et votre clé API</string>
+    <string name="server_config_description">Entrez l\'URL du serveur SMS Gateway et votre clé API</string>
     <string name="server_url_hint">URL du serveur</string>
     <string name="api_key_hint">Clé API</string>
     <string name="server_url_required">L\'URL du serveur est requise</string>
@@ -125,9 +125,9 @@
     <string name="error_invalid_url">URL invalide</string>
     
     <!-- Notifications -->
-    <string name="notification_channel_name">Service SERVO COMMUNICATION</string>
-    <string name="notification_channel_description">Notifications du service SERVO COMMUNICATION</string>
-    <string name="notification_title">SERVO COMMUNICATION</string>
+    <string name="notification_channel_name">Service SMS Gateway</string>
+    <string name="notification_channel_description">Notifications du service SMS Gateway</string>
+    <string name="notification_title">SMS Gateway</string>
     <string name="notification_text">Service en cours d\'exécution</string>
     
     <!-- Errors -->

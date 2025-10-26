@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Background Circle -->
+    <path
+        android:fillColor="@color/futuristic_background"
+        android:pathData="M0,0h108v108h-108z" />
+    
+    <!-- Outer Glow Ring -->
+    <path
+        android:strokeColor="@color/neon_blue"
+        android:strokeWidth="3"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M54,54m-45,0a45,45 0,1 1,90 0a45,45 0,1 1,-90 0" />
+    
+    <!-- Inner Ring -->
+    <path
+        android:strokeColor="@color/neon_cyan"
+        android:strokeWidth="2"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M54,54m-35,0a35,35 0,1 1,70 0a35,35 0,1 1,-70 0" />
+    
+    <!-- SMS Icon -->
+    <path
+        android:fillColor="@color/neon_green"
+        android:pathData="M30,40 L78,40 A6,6 0,0 1,84 46 L84,62 A6,6 0,0 1,78 68 L36,68 L30,74 L30,46 A6,6 0,0 1,30 40 Z" />
+    
+    <!-- Lightning Bolt -->
+    <path
+        android:fillColor="@color/neon_blue"
+        android:pathData="M50,35 L58,50 L54,50 L60,73 L52,58 L56,58 L50,35 Z" />
+    
+    <!-- Signal Waves -->
+    <path
+        android:strokeColor="@color/neon_purple"
+        android:strokeWidth="2"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M25,50 Q30,45 35,50 Q30,55 25,50" />
+    
+    <path
+        android:strokeColor="@color/neon_purple"
+        android:strokeWidth="2"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M73,50 Q78,45 83,50 Q78,55 73,50" />
+</vector>

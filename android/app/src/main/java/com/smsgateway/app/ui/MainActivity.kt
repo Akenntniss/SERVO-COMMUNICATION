@@ -20,7 +20,12 @@ import com.smsgateway.app.data.model.SimSyncRequest
 import com.smsgateway.app.utils.PreferencesManager
 import com.smsgateway.app.utils.SimUtils
 import com.smsgateway.app.service.MessageManager
+import com.smsgateway.app.service.SmsService
 import kotlinx.coroutines.launch
+import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
+import android.net.Uri
 
 class MainActivity : AppCompatActivity() {
     
@@ -45,7 +50,11 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.RECEIVE_SMS,
         Manifest.permission.READ_SMS,
         Manifest.permission.READ_PHONE_STATE,
-        Manifest.permission.READ_PHONE_NUMBERS
+        Manifest.permission.READ_PHONE_NUMBERS,
+        Manifest.permission.WAKE_LOCK,
+        Manifest.permission.FOREGROUND_SERVICE,
+        Manifest.permission.POST_NOTIFICATIONS,
+        Manifest.permission.RECEIVE_BOOT_COMPLETED
     )
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,6 +68,8 @@ class MainActivity : AppCompatActivity() {
         
         if (checkPermissions()) {
             initializeApp()
+            startBackgroundService()
+            requestBatteryOptimizationExemption()
         } else {
             requestPermissions()
         }
@@ -131,6 +142,8 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == PERMISSIONS_REQUEST_CODE) {
             if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 initializeApp()
+                startBackgroundService()
+                requestBatteryOptimizationExemption()
             } else {
                 tvStatus.text = "❌ Permissions requises non accordées"
                 Toast.makeText(this, "Toutes les permissions sont nécessaires", Toast.LENGTH_LONG).show()
@@ -195,14 +208,8 @@ class MainActivity : AppCompatActivity() {
             try {
                 tvStatus.text = "🔄 Vérification de l'enregistrement..."
                 
-                // Vérifier si le téléphone existe sur le serveur
-                val response = ApiClient.getApiService()?.getPhones()
-                if (response?.isSuccessful == true) {
-                    val responseBody = response.body()
-                    val phones = responseBody?.data as? List<*>
-                    val phoneExists = phones?.any { phone ->
-                        (phone as? Map<*, *>)?.get("id")?.toString() == phoneId
-                    } ?: false
+                // Enregistrer directement le téléphone
+                val phoneExists = false // Simplification : toujours enregistrer
                     
                     if (phoneExists) {
                         tvStatus.text = "✅ Téléphone enregistré (ID: ${phoneId.take(8)}...)"
@@ -229,10 +236,10 @@ class MainActivity : AppCompatActivity() {
                 tvStatus.text = "🔄 Enregistrement du téléphone..."
                 
                 val phoneData = PhoneRegistration(
-                    telId = android.os.Build.MODEL,
                     model = android.os.Build.MODEL,
                     androidVersion = android.os.Build.VERSION.RELEASE,
-                    appVersion = "1.0.0"
+                    appVersion = "1.0.0",
+                    sims = simCards
                 )
                 
                 val response = ApiClient.getApiService()?.registerPhone(phoneData)
@@ -634,6 +641,58 @@ class MainActivity : AppCompatActivity() {
             updateServerInfo()
             updateServiceStatus()
             refreshData()
+        }
+    }
+    
+    /**
+     * Démarre le service en arrière-plan pour maintenir l'application active
+     */
+    private fun startBackgroundService() {
+        try {
+            val serviceIntent = Intent(this, SmsService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent)
+            } else {
+                startService(serviceIntent)
+            }
+            Log.i("MainActivity", "Service SMS démarré")
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Erreur lors du démarrage du service", e)
+        }
+    }
+    
+    /**
+     * Demande l'exemption d'optimisation de batterie pour éviter la mise en veille
+     */
+    private fun requestBatteryOptimizationExemption() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            val packageName = packageName
+            
+            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                AlertDialog.Builder(this)
+                    .setTitle("Optimisation de batterie")
+                    .setMessage("Pour que l'application fonctionne correctement en arrière-plan, veuillez désactiver l'optimisation de batterie pour SMS Gateway.")
+                    .setPositiveButton("Paramètres") { _, _ ->
+                        try {
+                            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                                data = Uri.parse("package:$packageName")
+                            }
+                            startActivity(intent)
+                        } catch (e: Exception) {
+                            Log.e("MainActivity", "Erreur ouverture paramètres batterie", e)
+                            // Fallback vers les paramètres généraux
+                            try {
+                                val fallbackIntent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                                startActivity(fallbackIntent)
+                            } catch (e2: Exception) {
+                                Log.e("MainActivity", "Erreur fallback paramètres batterie", e2)
+                            }
+                        }
+                    }
+                    .setNegativeButton("Plus tard", null)
+                    .show()
+            }
         }
     }
 }

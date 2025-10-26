@@ -363,6 +363,13 @@ function renderSims() {
                             title="Supprimer la SIM">
                         <i class="fas fa-trash me-1"></i>Supprimer
                     </button>
+                    ${!sim.is_active ? `
+                    <button class="btn btn-sm btn-outline-primary" 
+                            onclick="verifyAndReactivate('${sim.id}')" 
+                            title="Tester la SIM et la réactiver si le test réussit">
+                        <i class="fas fa-check-circle me-1"></i>Vérifier et Réactiver
+                    </button>
+                    ` : ''}
                 </div>
             </td>
         </tr>
@@ -721,19 +728,41 @@ async function toggleStatus(simId) {
     const newStatus = sim.is_active ? 'inactive' : 'active';
     
     try {
-        const response = await fetch(`${API_URL}/sims/${simId}/config`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ status: newStatus })
-        });
-        
-        if (response.ok) {
-            showSuccess(`SIM ${newStatus === 'active' ? 'activée' : 'désactivée'} avec succès`);
-            loadSims();
+        // Si on active une SIM désactivée, utiliser le système intelligent
+        if (newStatus === 'active') {
+            console.log('🔄 Activation intelligente pour SIM désactivée');
+            
+            const response = await fetch(`${API_URL}/sims/${simId}/reactivate-and-exclude`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showSuccess(`SIM réactivée et remise en surveillance normale !`);
+                loadSims();
+            } else {
+                throw new Error(result.message || 'Erreur lors de la réactivation intelligente');
+            }
         } else {
-            throw new Error('Erreur lors du changement de statut');
+            // Si on désactive, utiliser l'ancienne méthode
+            const response = await fetch(`${API_URL}/sims/${simId}/config`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            
+            if (response.ok) {
+                showSuccess(`SIM désactivée avec succès`);
+                loadSims();
+            } else {
+                throw new Error('Erreur lors de la désactivation');
+            }
         }
     } catch (error) {
         console.error('Erreur lors du changement de statut:', error);
@@ -923,6 +952,266 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Rendre la fonction globale
-window.closeLimitsModal = closeLimitsModal; 
+window.closeLimitsModal = closeLimitsModal;
+
+// Fonction pour vérifier et réactiver une SIM
+async function verifyAndReactivate(simId) {
+    try {
+        console.log(`🧪 Test de réactivation demandé pour SIM ${simId}`);
+        
+        // Afficher une notification de début de test
+        showSuccess(`Test de réactivation en cours pour la SIM ${simId}...`);
+        
+        // Désactiver le bouton pendant le test
+        const button = document.querySelector(`button[onclick="verifyAndReactivate('${simId}')"]`);
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Test en cours...';
+        }
+        
+        // Appeler l'API de test
+        const response = await fetch(`${API_URL}/sims/${simId}/verify-reactivate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showSuccess(`Test lancé avec succès ! SMS de test envoyé au +33782962906. Résultat dans 30 secondes.`);
+            
+            // Attendre 35 secondes puis recharger les SIMs pour voir le résultat
+            setTimeout(async () => {
+                await loadSims();
+                
+                // Vérifier si la SIM est maintenant active
+                const updatedSim = sims.find(s => s.id == simId);
+                if (updatedSim && updatedSim.is_active) {
+                    showSuccess(`✅ SIM ${simId} réactivée avec succès ! Le test SMS a réussi.`);
+                } else {
+                    showError(`❌ SIM ${simId} reste désactivée. Le test SMS a échoué.`);
+                }
+            }, 35000);
+            
+        } else {
+            showError(`Erreur lors du test : ${result.message}`);
+            
+            // Réactiver le bouton en cas d'erreur
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-check-circle me-1"></i>Vérifier et Réactiver';
+            }
+        }
+        
+    } catch (error) {
+        console.error('Erreur lors du test de réactivation:', error);
+        showError('Erreur lors du test de réactivation');
+        
+        // Réactiver le bouton en cas d'erreur
+        const button = document.querySelector(`button[onclick="verifyAndReactivate('${simId}')"]`);
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-check-circle me-1"></i>Vérifier et Réactiver';
+        }
+    }
+}
+
+// Rendre la fonction globale pour les onclick
+window.verifyAndReactivate = verifyAndReactivate;
+
+// Fonctions pour la réactivation de SIMs désactivées par la surveillance
+async function loadDisabledSims() {
+    try {
+        console.log('🔍 Chargement des SIMs désactivées par la surveillance...');
+        
+        const response = await fetch(`${API_URL}/sims/disabled-by-monitoring`);
+        const result = await response.json();
+        
+        if (result.success) {
+            const disabledSims = result.data;
+            console.log(`📊 ${disabledSims.length} SIM(s) désactivée(s) trouvée(s)`);
+            
+            const container = document.getElementById('disabledSimsContainer');
+            const noSimsDiv = document.getElementById('noDisabledSims');
+            
+            if (disabledSims.length === 0) {
+                container.style.display = 'none';
+                noSimsDiv.style.display = 'block';
+            } else {
+                container.style.display = 'block';
+                noSimsDiv.style.display = 'none';
+                
+                container.innerHTML = `
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>SIM</th>
+                                    <th>Téléphone</th>
+                                    <th>Échecs récents</th>
+                                    <th>Dernier échec</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${disabledSims.map(sim => `
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <strong>${sim.phone_number || 'N/A'}</strong>
+                                                <br>
+                                                <small class="text-muted">${sim.carrier_name || 'N/A'}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">${sim.phone_model || sim.phone_id}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-danger">${sim.recent_failures} échec(s)</span>
+                                        </td>
+                                        <td>
+                                            <small>${new Date(sim.last_failure).toLocaleString()}</small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1">
+                                                <button class="btn btn-sm btn-outline-success" 
+                                                        onclick="reactivateSimDirectly('${sim.id}')" 
+                                                        title="Réactiver sans test">
+                                                    <i class="fas fa-power-off"></i> Réactiver
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-primary" 
+                                                        onclick="testAndReactivateWithExclusion('${sim.id}')" 
+                                                        title="Tester puis réactiver si succès">
+                                                    <i class="fas fa-check-circle"></i> Tester & Réactiver
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+        } else {
+            showError('Erreur lors du chargement des SIMs désactivées');
+        }
+        
+    } catch (error) {
+        console.error('Erreur lors du chargement des SIMs désactivées:', error);
+        showError('Erreur lors du chargement des SIMs désactivées');
+    }
+}
+
+// Réactiver directement une SIM (sans test)
+async function reactivateSimDirectly(simId) {
+    try {
+        console.log(`🔄 Réactivation directe de la SIM ${simId}`);
+        
+        const response = await fetch(`${API_URL}/sims/${simId}/reactivate-and-exclude`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showSuccess(`SIM ${result.data.phone_number || simId} réactivée et remise en surveillance normale !`);
+            
+            // Recharger les listes
+            setTimeout(() => {
+                loadDisabledSims();
+                loadSims();
+            }, 1000);
+        } else {
+            showError(`Erreur : ${result.message}`);
+        }
+        
+    } catch (error) {
+        console.error('Erreur lors de la réactivation directe:', error);
+        showError('Erreur lors de la réactivation directe');
+    }
+}
+
+// Tester et réactiver avec exclusion de la surveillance
+async function testAndReactivateWithExclusion(simId) {
+    try {
+        console.log(`🧪 Test et réactivation avec exclusion pour SIM ${simId}`);
+        
+        // Désactiver le bouton pendant le test
+        const button = document.querySelector(`button[onclick="testAndReactivateWithExclusion('${simId}')"]`);
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Test...';
+        }
+        
+        const response = await fetch(`${API_URL}/sims/${simId}/test-and-reactivate-exclude`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showSuccess(`Test lancé ! SMS envoyé au +33782962906. Si réussi, la SIM sera réactivée et remise en surveillance normale.`);
+            
+            // Attendre 35 secondes puis recharger
+            setTimeout(() => {
+                loadDisabledSims();
+                loadSims();
+                showSuccess('Vérification terminée. Consultez les résultats.');
+            }, 35000);
+            
+        } else {
+            showError(`Erreur : ${result.message}`);
+            
+            // Réactiver le bouton
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-check-circle"></i> Tester & Réactiver';
+            }
+        }
+        
+    } catch (error) {
+        console.error('Erreur lors du test avec exclusion:', error);
+        showError('Erreur lors du test avec exclusion');
+        
+        // Réactiver le bouton
+        const button = document.querySelector(`button[onclick="testAndReactivateWithExclusion('${simId}')"]`);
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-check-circle"></i> Tester & Réactiver';
+        }
+    }
+}
+
+// Gestionnaire d'événements pour le modal de réactivation
+document.addEventListener('DOMContentLoaded', () => {
+    // Charger les SIMs désactivées quand le modal s'ouvre
+    const reactivationModal = document.getElementById('reactivationModal');
+    if (reactivationModal) {
+        reactivationModal.addEventListener('shown.bs.modal', () => {
+            loadDisabledSims();
+        });
+    }
+    
+    // Bouton actualiser
+    const refreshBtn = document.getElementById('refreshDisabledSims');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            loadDisabledSims();
+        });
+    }
+});
+
+// Rendre les fonctions globales
+window.reactivateSimDirectly = reactivateSimDirectly;
+window.testAndReactivateWithExclusion = testAndReactivateWithExclusion; 
  
  

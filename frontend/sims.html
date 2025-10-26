@@ -56,6 +56,9 @@
                 <button class="btn btn-cyber me-2" data-bs-toggle="modal" data-bs-target="#autoFailoverModal">
                     <i class="fas fa-exchange-alt"></i> Basculement Auto
                 </button>
+                <button class="btn btn-cyber me-2" data-bs-toggle="modal" data-bs-target="#reactivationModal">
+                    <i class="fas fa-redo"></i> Réactivation de carte sim
+                </button>
                 <button class="btn btn-cyber" data-bs-toggle="modal" data-bs-target="#addSimModal">
                     <i class="fas fa-plus"></i> Ajouter une SIM
                 </button>
@@ -426,6 +429,48 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-cyber" data-bs-dismiss="modal">Annuler</button>
                     <button type="button" class="btn btn-cyber" id="saveFailoverConfigBtn">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Réactivation de carte SIM -->
+    <div class="modal fade" id="reactivationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content cyber-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title neon-text">Réactivation de carte SIM</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <p class="text-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Ces SIMs ont été désactivées automatiquement par le système de surveillance. 
+                            Vous pouvez les tester et les réactiver en les excluant de la surveillance automatique.
+                        </p>
+                    </div>
+                    
+                    <div id="disabledSimsContainer">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                            <p class="mt-2">Chargement des SIMs désactivées...</p>
+                        </div>
+                    </div>
+                    
+                    <div id="noDisabledSims" class="text-center py-4" style="display: none;">
+                        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                        <h5>Aucune SIM désactivée</h5>
+                        <p class="text-muted">Toutes vos SIMs sont actives ou ont été exclues de la surveillance.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cyber" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-cyber" id="refreshDisabledSims">
+                        <i class="fas fa-sync"></i> Actualiser
+                    </button>
                 </div>
             </div>
         </div>

@@ -183,7 +183,7 @@
                             <div class="code-block">
 <pre><code>{
   "recipient": "+33612345678",  // Numéro du destinataire (obligatoire)
-  "message": "Votre message"    // Contenu du SMS (obligatoire, max 160 caractères)
+  "message": "Votre message"    // Contenu du SMS (obligatoire)
 }</code></pre>
                             </div>
 
@@ -531,7 +531,7 @@ curl http://168.231.85.4:3001/api/health</code></pre>
 // Message trop long
 {
   "success": false,
-  "message": "Le message ne peut pas dépasser 160 caractères"
+  "message": "Le message ne peut pas être vide"
 }
 
 // Aucun téléphone connecté
